@@ -172,18 +172,58 @@ app.get('/api/orders/:code', async (req, res) => {
    PAYMENT & QR CODE ROUTES
    ============================================================ */
 
+// ⚠️ TEST MODE: Set to 'false' when you want to use REAL money with SasaPay
+const TEST_MODE = true; 
+
 app.post('/api/payments/initialize', async (req, res) => {
   try {
     const { orderCode } = req.body;
     const order = await Order.findOne({ orderCode });
     if (!order) return res.status(404).json({ message: 'Order not found' });
 
-    const saspayUrl = `https://link.saspay.me/o9gdrykuu6u?ref=${orderCode}`; 
+    // If TEST_MODE is ON, redirect to our fake internal payment page
+    if (TEST_MODE) {
+      return res.json({ paymentUrl: `/mock-payment?ref=${orderCode}` });
+    }
 
+    // Real SasaPay Link (Used when TEST_MODE is false)
+    const saspayUrl = `https://link.saspay.me/o9gdrykuu6u?ref=${orderCode}`; 
     res.json({ paymentUrl: saspayUrl });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
+});
+
+// Fake SasaPay Page (Only works when TEST_MODE = true)
+app.get('/mock-payment', (req, res) => {
+  const { ref } = req.query;
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Test Paiement - SasaPay</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px 20px; background: #eef2f5; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 8px; max-width: 400px; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-top: 6px solid #f1c40f; }
+        h1 { color: #333; font-size: 1.4rem; }
+        .btn { display: block; width: 100%; padding: 15px; background: #27ae60; color: white; border: none; border-radius: 4px; font-size: 1.1rem; font-weight: bold; margin-top: 20px; cursor: pointer; text-decoration: none; box-sizing: border-box; }
+        .btn:hover { background: #219150; }
+        .cancel { display: block; margin-top: 15px; color: #e74c3c; text-decoration: none; font-size: 0.9rem; }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <h1>Passerelle de Test SasaPay</h1>
+        <p>Code de commande : <strong>${ref || 'Inconnu'}</strong></p>
+        <p style="color: #666; font-size: 0.9rem;">Ceci est une simulation. Aucun argent ne sera débité.</p>
+        
+        <a href="/payment/success?ref=${ref}" class="btn">Simuler le paiement réussi</a>
+        <a href="/" class="cancel">Annuler et retourner à l'accueil</a>
+      </div>
+    </body>
+    </html>
+  `);
 });
 
 app.get('/payment/success', async (req, res) => {
