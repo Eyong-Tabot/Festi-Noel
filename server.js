@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
+const QRCode = require('qrcode'); 
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -52,9 +53,11 @@ const orderSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ['pending', 'confirmed', 'cancelled'],
-      default: 'confirmed'
+      default: 'pending'
     },
-    orderCode: { type: String, unique: true, required: true }
+    orderCode: { type: String, unique: true, required: true },
+    isScanned: { type: Boolean, default: false },
+    scannedAt: { type: Date, default: null }
   },
   { timestamps: true }
 );
@@ -103,14 +106,6 @@ function buildDemoTickets() {
       featured: true,
       badge: 'Le plus populaire',
       iconBase64: monogram('P', '#8e2c20', '#f5e6dc')
-    },
-    {
-      name: 'Couple (2 Personnes)',
-      description: 'Une soirée romantique sous les étoiles.',
-      price: 3500,
-      ageRange: '2 Personnes',
-      perks: ['2 entrées incluses', 'Accès prioritaire', 'Économisez 500 F'],
-      iconBase64: monogram('C')
     }
   ];
 }
@@ -155,7 +150,7 @@ app.post('/api/orders', async (req, res) => {
       });
     }
     const orderCode = 'FESTI-' + Math.random().toString(36).slice(2, 8).toUpperCase();
-    const order = new Order({ customer, items: validatedItems, total, orderCode, status: 'pending' }); // Pending until Momo is added
+    const order = new Order({ customer, items: validatedItems, total, orderCode, status: 'pending' });
     await order.save();
     res.status(201).json({ message: 'Order confirmed', order });
   } catch (err) {
@@ -170,6 +165,74 @@ app.get('/api/orders/:code', async (req, res) => {
     res.json(order);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+/* ============================================================
+   PAYMENT & QR CODE ROUTES
+   ============================================================ */
+
+app.post('/api/payments/initialize', async (req, res) => {
+  try {
+    const { orderCode } = req.body;
+    const order = await Order.findOne({ orderCode });
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+
+    const saspayUrl = `https://link.saspay.me/o9gdrykuu6u?ref=${orderCode}`; 
+
+    res.json({ paymentUrl: saspayUrl });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+app.get('/payment/success', async (req, res) => {
+  try {
+    const { ref } = req.query;
+    if (!ref) return res.status(400).send('Missing reference code.');
+
+    const order = await Order.findOne({ orderCode: ref });
+    if (!order) return res.status(404).send('Order not found.');
+
+    if (order.status !== 'confirmed') {
+      order.status = 'confirmed';
+      await order.save();
+    }
+
+    const qrCodeDataUrl = await QRCode.toDataURL(order.orderCode);
+
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Billet Confirmé - Festi Noël</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+        <style>
+          body { font-family: 'Inter', sans-serif; text-align: center; padding: 40px 20px; background: #fbf8f1; margin: 0; }
+          .card { background: white; padding: 30px; border-radius: 8px; max-width: 400px; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-top: 6px solid #0b3d2e; }
+          .qr-img { width: 100%; max-width: 250px; height: auto; margin: 20px auto; display: block; border: 1px solid #eee; border-radius: 8px; padding: 10px; }
+          h1 { color: #0b3d2e; font-family: Georgia, serif; margin-top: 0; }
+          .code { font-family: monospace; font-size: 1.2rem; font-weight: bold; color: #b23a2c; background: #fdfaf3; padding: 8px 12px; border-radius: 4px; display: inline-block; margin-top: 10px; border: 1px dashed #ccc; }
+          p { color: #626b66; line-height: 1.5; }
+          .btn { display: inline-block; margin-top: 25px; padding: 12px 24px; background: #0b3d2e; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <h1>Paiement Confirmé</h1>
+          <p>Merci <strong>${order.customer.name}</strong>. Voici votre QR Code d'accès.</p>
+          <img src="${qrCodeDataUrl}" class="qr-img" alt="QR Code">
+          <p>Présentez ce code à l'entrée le 12 Décembre.</p>
+          <div class="code">${order.orderCode}</div>
+          <br>
+          <a href="/" class="btn">Retour à l'accueil</a>
+        </div>
+      </body>
+      </html>
+    `);
+  } catch (err) {
+    res.status(500).send('Server error generating QR code.');
   }
 });
 
@@ -200,15 +263,11 @@ app.get('/api/admin/stats', requireAdmin, async (req, res) => {
 
 app.get('/api/admin/orders', requireAdmin, async (req, res) => {
   try {
-    const limit = Math.min(Number(req.query.limit) || 25, 200);
-    const skip = Math.max(Number(req.query.skip) || 0, 0);
-    const filter = {};
-    if (req.query.status) filter.status = req.query.status;
     const [orders, total] = await Promise.all([
-      Order.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).populate('items.ticketId', 'name price'),
-      Order.countDocuments(filter)
+      Order.find().sort({ createdAt: -1 }).limit(50).populate('items.ticketId', 'name price'),
+      Order.countDocuments()
     ]);
-    res.json({ orders, total, skip, limit });
+    res.json({ orders, total });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
@@ -228,57 +287,28 @@ app.patch('/api/admin/orders/:id/status', requireAdmin, async (req, res) => {
   }
 });
 
-app.get('/api/admin/tickets', requireAdmin, async (req, res) => {
+app.post('/api/admin/scan', requireAdmin, async (req, res) => {
   try {
-    const [tickets, orders] = await Promise.all([
-      Ticket.find().sort({ price: 1 }),
-      Order.find({ status: { $ne: 'cancelled' } })
-    ]);
-    const soldMap = {};
-    for (const o of orders) {
-      for (const it of o.items) {
-        const key = it.ticketId.toString();
-        soldMap[key] = (soldMap[key] || 0) + it.quantity;
-      }
+    const { orderCode } = req.body;
+    const order = await Order.findOne({ orderCode });
+
+    if (!order) {
+      return res.status(404).json({ message: "Fake ticket. Introuvable." });
     }
-    const result = tickets.map((t) => {
-      const obj = t.toObject();
-      obj.sold = soldMap[t._id.toString()] || 0;
-      return obj;
-    });
-    res.json(result);
+    if (order.status !== 'confirmed') {
+      return res.status(400).json({ message: "Paiement non validé (En attente)." });
+    }
+    if (order.isScanned) {
+      return res.status(400).json({ message: "DÉJÀ SCANNÉ ! Accès refusé." });
+    }
+
+    order.isScanned = true;
+    order.scannedAt = new Date();
+    await order.save();
+
+    res.json({ message: "Accès Autorisé", customer: order.customer.name });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
-  }
-});
-
-app.post('/api/admin/tickets', requireAdmin, async (req, res) => {
-  try {
-    const ticket = new Ticket(req.body);
-    await ticket.save();
-    res.status(201).json(ticket);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-app.patch('/api/admin/tickets/:id', requireAdmin, async (req, res) => {
-  try {
-    const ticket = await Ticket.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    if (!ticket) return res.status(404).json({ message: 'Not found' });
-    res.json(ticket);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-app.delete('/api/admin/tickets/:id', requireAdmin, async (req, res) => {
-  try {
-    const ticket = await Ticket.findByIdAndDelete(req.params.id);
-    if (!ticket) return res.status(404).json({ message: 'Not found' });
-    res.json({ ok: true });
-  } catch (err) {
-    res.status(400).json({ message: err.message });
   }
 });
 
@@ -295,10 +325,9 @@ app.get('*', (req, res) => {
 
 async function seedIfEmpty() {
   try {
-    // Drop existing tickets to force the new real tickets to load
     await Ticket.deleteMany({}); 
     await Ticket.insertMany(buildDemoTickets());
-    console.log('Seeded real event tickets');
+    console.log('Seeded 2 real event tickets (Single & Pack 5)');
   } catch (err) {
     console.error('Seed check failed:', err.message);
   }
