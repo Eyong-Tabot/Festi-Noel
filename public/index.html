@@ -67,7 +67,7 @@
     .eyebrow { color: var(--red); font-weight: 700; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; }
     .section h2 { margin: 0 0 12px; color: var(--green-800); font-size: clamp(1.9rem, 3.6vw, 2.6rem); line-height: 1.1; font-weight: 700; }
     .section-head p { margin: 0; color: var(--muted); font-size: 1rem; }
-    .ticket-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .ticket-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; max-width: 800px; margin: 0 auto; }
     .ticket-card { position: relative; display: flex; flex-direction: column; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
     .ticket-card:hover { border-color: rgba(11,61,46,0.28); box-shadow: var(--shadow); }
     .ticket-card.featured { border-color: var(--gold-dark); background: #fffdf7; }
@@ -193,7 +193,7 @@
 
     <section class="section" id="billets">
       <div class="container">
-        <div class="section-head">
+        <div class="section-head" style="text-align: center; margin: 0 auto 36px;">
           <div class="eyebrow">Billetterie</div>
           <h2>Choisissez votre formule</h2>
           <p>Des billets simples et des packs pour profiter de toutes les animations.</p>
@@ -218,7 +218,6 @@
       </div>
     </section>
 
-    <!-- Ticket Finder Section -->
     <section class="section" id="find-ticket" style="background: var(--green-800); color: white;">
       <div class="container" style="max-width: 600px; text-align: center;">
         <div class="eyebrow" style="color: var(--gold);">Mes Billets</div>
@@ -229,31 +228,6 @@
           <button type="submit" class="btn btn-primary">Rechercher</button>
         </form>
         <div id="findResult" style="margin-top: 20px; font-weight: 600;"></div>
-      </div>
-    </section>
-
-    <!-- Momo Payment Info -->
-    <section class="payment-section">
-      <div class="container">
-        <div class="payment-box">
-          <h3>Paiement Mobile Money</h3>
-          <p>Pour valider votre commande, envoyez le montant exact au numéro correspondant :</p>
-          <div style="display: flex; justify-content: center; gap: 40px; margin: 20px 0;">
-            <div>
-              <strong style="color: var(--green-800);">MTN MoMo</strong><br>
-              <span class="payment-number">691 29 85 81</span>
-            </div>
-            <div>
-              <strong style="color: var(--green-800);">Orange Money</strong><br>
-              <span class="payment-number">657 87 98 14</span>
-            </div>
-          </div>
-          <p style="font-size: 0.85rem; color: var(--muted);">Envoyez ensuite votre code <strong>FESTI-XXXXXX</strong> par WhatsApp pour confirmer.</p>
-          <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
-            <a href="https://wa.me/237691298581" target="_blank" class="btn btn-dark" style="font-size: 0.85rem;">WhatsApp 691</a>
-            <a href="https://wa.me/237657879814" target="_blank" class="btn btn-dark" style="font-size: 0.85rem;">WhatsApp 657</a>
-          </div>
-        </div>
       </div>
     </section>
   </main>
@@ -276,7 +250,7 @@
     <div class="drawer-footer">
       <div class="total-row"><span>Total</span><strong id="cartTotal">0 FRS</strong></div>
       <button class="btn btn-primary" id="checkoutBtn" type="button">Passer commande</button>
-      <p class="demo-note">Le paiement se fera par Mobile Money.</p>
+      <p class="demo-note">Paiement sécurisé via SasaPay.</p>
     </div>
   </aside>
 
@@ -291,18 +265,10 @@
         <form id="checkoutForm" novalidate>
           <div class="form-grid">
             <div class="field full"><label for="name">Nom complet</label><input id="name" name="name" type="text" required placeholder="Marie Dupont" /></div>
-            <div class="field full"><label for="phone">Numéro de téléphone (MoMo/OM)</label><input id="phone" name="phone" type="tel" required placeholder="6 XX XX XX XX" /></div>
+            <div class="field full"><label for="phone">Numéro de téléphone</label><input id="phone" name="phone" type="tel" required placeholder="6 XX XX XX XX" /></div>
           </div>
-          <button class="btn btn-primary checkout-submit" type="submit">Confirmer la réservation</button>
+          <button class="btn btn-primary checkout-submit" type="submit">Payer avec SasaPay</button>
         </form>
-      </div>
-      <div class="success-view" id="successView" hidden>
-        <div class="success-icon" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M4 12l5 5L20 6"/></svg></div>
-        <h3>Réservation enregistrée</h3>
-        <p>Votre code de réservation est :</p>
-        <div class="order-code" id="orderCode">FESTI-000000</div>
-        <p style="font-size: 0.85rem; margin-bottom: 20px;">Veuillez payer par MoMo/OM et envoyer ce code par WhatsApp pour valider vos billets.</p>
-        <button class="btn btn-dark" id="successCloseBtn" type="button">Fermer</button>
       </div>
     </div>
   </div>
@@ -321,15 +287,12 @@
     const checkoutModal = document.getElementById('checkoutModal');
     const checkoutSummary = document.getElementById('checkoutSummary');
     const checkoutFormView = document.getElementById('checkoutFormView');
-    const successView = document.getElementById('successView');
     const checkoutForm = document.getElementById('checkoutForm');
-    const orderCode = document.getElementById('orderCode');
     const toast = document.getElementById('toast');
     let tickets = [];
     let cart = loadCart();
     let toastTimer;
     
-    // Format to FRS
     const money = (v) => new Intl.NumberFormat('fr-FR').format(v) + ' FRS';
     
     function loadCart() { try { return JSON.parse(localStorage.getItem('festi-noel-cart')) || {}; } catch { return {}; } }
@@ -393,12 +356,12 @@
       checkoutSummary.innerHTML = entries.map(([id, qty]) => { const t = getTicket(id); return `<div class="summary-line"><span>${qty} × ${t.name}</span><strong>${money(t.price * qty)}</strong></div>`; }).join('') + `<div class="summary-total"><span>Total</span><span>${money(cartTotalValue())}</span></div>`;
     }
     
-    function openCheckout() { if (!cartCountValue()) return; closeCart(); renderCheckoutSummary(); checkoutFormView.hidden = false; successView.hidden = true; checkoutModal.hidden = false; setOverlay(true); }
-    function closeCheckout() { checkoutModal.hidden = true; checkoutFormView.hidden = false; successView.hidden = true; setOverlay(false); }
+    function openCheckout() { if (!cartCountValue()) return; closeCart(); renderCheckoutSummary(); checkoutModal.hidden = false; setOverlay(true); }
+    function closeCheckout() { checkoutModal.hidden = true; setOverlay(false); }
     function showToast(msg) { clearTimeout(toastTimer); toast.textContent = msg; toast.classList.add('show'); toastTimer = setTimeout(() => toast.classList.remove('show'), 2400); }
     
     const EVENT_DATE = new Date('2026-12-12T18:00:00');
-    function updateCountdown() { const el = document.getElementById('countdown'); const diff = EVENT_DATE - new Date(); if (diff <= 0) { el.textContent = "C'est aujourd'hui"; return; } const days = Math.floor(diff / 86400000); const hours = Math.floor((diff / 3600000) % 24); const mins = Math.floor((diff / 60000) % 60); el.textContent = `J-${days} : ${hours}h`; }
+    function updateCountdown() { const el = document.getElementById('countdown'); const diff = EVENT_DATE - new Date(); if (diff <= 0) { el.textContent = "C'est aujourd'hui"; return; } const days = Math.floor(diff / 86400000); const hours = Math.floor((diff / 3600000) % 24); el.textContent = `J-${days} : ${hours}h`; }
     function makeSnow() { const snow = document.getElementById('snow'); for (let i = 0; i < 30; i++) { const s = document.createElement('span'); const size = 2 + Math.random() * 3; s.style.left = Math.random() * 100 + 'vw'; s.style.width = size + 'px'; s.style.height = size + 'px'; s.style.opacity = 0.25 + Math.random() * 0.4; s.style.animationDuration = 10 + Math.random() * 14 + 's'; s.style.animationDelay = -Math.random() * 20 + 's'; snow.appendChild(s); } }
     
     ticketGrid.addEventListener('click', (e) => { const btn = e.target.closest('[data-add]'); if (btn) addToCart(btn.dataset.add); });
@@ -407,10 +370,8 @@
     document.getElementById('closeCartBtn').addEventListener('click', closeCart);
     checkoutBtn.addEventListener('click', openCheckout);
     document.getElementById('closeCheckoutBtn').addEventListener('click', closeCheckout);
-    document.getElementById('successCloseBtn').addEventListener('click', closeCheckout);
     overlay.addEventListener('click', () => { if (!checkoutModal.hidden) closeCheckout(); else closeCart(); });
     
-    // Find Ticket Logic
     document.getElementById('findTicketForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const code = document.getElementById('findTicketInput').value.trim().toUpperCase();
@@ -423,15 +384,17 @@
         if (!res.ok) throw new Error('Introuvable');
         const data = await res.json();
         resDiv.innerHTML = `<span style="color:var(--gold);">✅ Réservation trouvée pour ${data.customer.name}.</span><br>
-        <span style="font-size:0.9rem; color:rgba(255,255,255,0.8);">Statut : ${data.status === 'confirmed' ? 'Payé et Confirmé' : 'En attente de paiement MoMo/OM'}</span>`;
+        <span style="font-size:0.9rem; color:rgba(255,255,255,0.8);">Statut : ${data.status === 'confirmed' ? 'Payé et Confirmé' : 'En attente de paiement'}</span>`;
       } catch (err) {
         resDiv.innerHTML = `<span style="color:#ff6b6b;">Code introuvable. Vérifiez et réessayez.</span>`;
       }
     });
 
+    // SasaPay Redirect Logic
     checkoutForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!checkoutForm.checkValidity()) { checkoutForm.reportValidity(); return; }
+      
       const payload = { 
         customer: { 
           name: document.getElementById('name').value.trim(), 
@@ -439,15 +402,27 @@
         }, 
         items: Object.entries(cart).filter(([, qty]) => qty > 0).map(([ticketId, quantity]) => ({ ticketId, quantity })) 
       };
+      
       try {
         const res = await fetch(`${API}/orders`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         if (!res.ok) { const errData = await res.json(); throw new Error(errData.message || 'Order failed'); }
         const data = await res.json();
-        orderCode.textContent = data.order.orderCode;
+        const orderCode = data.order.orderCode;
+        
+        const payRes = await fetch(`${API}/payments/initialize`, { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ orderCode }) 
+        });
+        const payData = await payRes.json();
+        
         cart = {}; saveCart(); renderCart();
-        checkoutFormView.hidden = true; successView.hidden = false;
-        showToast('Commande enregistrée');
-      } catch (err) { showToast(err.message || 'Une erreur est survenue'); }
+        showToast('Redirection vers SasaPay...');
+        window.location.href = payData.paymentUrl;
+        
+      } catch (err) { 
+        showToast(err.message || 'Une erreur est survenue'); 
+      }
     });
     
     makeSnow(); updateCountdown(); setInterval(updateCountdown, 60000); fetchTickets();
