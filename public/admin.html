@@ -36,120 +36,85 @@
     .btn-primary, .btn-secondary, .btn-ghost, .btn-danger { border: 0; border-radius: var(--radius); padding: 9px 14px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.15s ease; }
     .btn-primary { background: var(--green-800); color: var(--white); }
     .btn-primary:hover { background: var(--green-700); }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-secondary { background: var(--gold); color: var(--green-900); }
     .btn-secondary:hover { background: #f0c65c; }
     .btn-ghost { background: transparent; color: rgba(255,255,255,0.85); border: 1px solid rgba(255,255,255,0.22); }
     .btn-ghost:hover { background: rgba(255,255,255,0.08); }
-    .btn-danger { background: transparent; color: var(--red); border: 1px solid rgba(178,58,44,0.35); }
-    .btn-danger:hover { background: rgba(178,58,44,0.08); }
     .icon-btn { width: 30px; height: 30px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: var(--white); color: var(--green-800); display: grid; place-items: center; padding: 0; }
-    .icon-btn:hover { background: #efe9df; }
     #loginView { min-height: calc(100vh - 60px); display: grid; place-items: center; padding: 24px; }
     .login-card { width: min(400px, 100%); background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 32px; }
     .login-card h1 { margin: 0 0 6px; color: var(--green-800); font-size: 1.5rem; }
     .login-card p { margin: 0 0 22px; color: var(--muted); font-size: 0.88rem; }
     .login-card label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--green-800); margin-bottom: 6px; }
     .login-card input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--cream); outline: none; font-family: var(--mono); font-size: 0.88rem; margin-bottom: 14px; }
-    .login-card input:focus { border-color: var(--green-700); box-shadow: 0 0 0 2px rgba(20,81,62,0.12); }
     .login-card .btn-primary { width: 100%; }
-    .login-error { margin: 12px 0 0; color: var(--red); font-size: 0.82rem; }
     #dashboardView { padding: 32px 0 64px; }
     .stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; margin-bottom: 32px; }
     .stat-card { background: var(--white); padding: 18px 20px; }
     .stat-card .label { font-size: 0.72rem; font-weight: 600; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
     .stat-card .value { font-family: var(--serif); font-size: 1.6rem; font-weight: 700; color: var(--green-800); line-height: 1.1; }
-    .stat-card .note { font-size: 0.76rem; color: var(--muted); margin-top: 4px; }
-    .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); margin-bottom: 20px; }
-    .tab { background: transparent; border: 0; padding: 10px 16px; font-size: 0.88rem; font-weight: 500; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
-    .tab:hover { color: var(--green-800); }
+    .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); margin-bottom: 20px; overflow-x: auto; }
+    .tab { background: transparent; border: 0; padding: 10px 16px; font-size: 0.88rem; font-weight: 500; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
     .tab.active { color: var(--green-800); border-bottom-color: var(--green-800); font-weight: 600; }
     .tab-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
-    .tab-toolbar select { padding: 7px 10px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--white); font-size: 0.85rem; }
     .data-table { width: 100%; border-collapse: collapse; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; font-size: 0.85rem; }
-    .data-table thead th { text-align: left; padding: 10px 14px; background: #f6f2e9; border-bottom: 1px solid var(--line); font-size: 0.72rem; font-weight: 600; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; }
+    .data-table thead th { text-align: left; padding: 10px 14px; background: #f6f2e9; border-bottom: 1px solid var(--line); font-size: 0.72rem; font-weight: 600; color: var(--muted); text-transform: uppercase; }
     .data-table tbody td { padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
-    .data-table tbody tr:last-child td { border-bottom: 0; }
-    .data-table tbody tr:hover { background: #fdfbf5; }
     .data-table .mono { font-family: var(--mono); font-size: 0.8rem; color: var(--green-800); font-weight: 600; }
     .data-table .muted { color: var(--muted); font-size: 0.8rem; }
     .data-table .right { text-align: right; }
-    .data-table select.status-select { padding: 5px 8px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--white); font-size: 0.8rem; }
-    .empty-row { text-align: center; color: var(--muted); padding: 40px 0; font-size: 0.88rem; }
     .order-detail-row td { background: #fbf8f1; padding: 0 !important; }
     .order-detail-inner { padding: 14px 20px; font-size: 0.82rem; color: var(--muted); }
-    .order-detail-inner strong { color: var(--green-800); }
-    .order-detail-list { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 4px; }
-    .order-detail-list li { display: flex; justify-content: space-between; max-width: 340px; }
-    .expand-toggle { background: transparent; border: 0; padding: 2px 6px; color: var(--green-800); font-size: 0.75rem; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
-    .ticket-icon-cell { width: 34px; height: 34px; border-radius: var(--radius-sm); background: #efe9df; color: var(--green-800); display: grid; place-items: center; font-family: var(--serif); font-size: 0.9rem; font-weight: 700; overflow: hidden; }
-    .ticket-icon-cell img { width: 100%; height: 100%; object-fit: cover; }
-    .toggle-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--green-800); }
-    .toggle-pill input[type="checkbox"] { width: 14px; height: 14px; accent-color: var(--green-700); }
-    .load-more { margin-top: 14px; background: transparent; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px 16px; font-size: 0.82rem; font-weight: 600; color: var(--green-800); }
-    .load-more:hover { background: #efe9df; }
+    .expand-toggle { background: transparent; border: 0; padding: 2px 6px; color: var(--green-800); font-size: 0.75rem; font-weight: 600; text-decoration: underline; }
     .modal { position: fixed; inset: 0; z-index: 100; background: rgba(6,40,31,0.5); display: grid; place-items: center; padding: 20px; }
-    .modal-card { width: min(560px, 100%); max-height: 92vh; overflow-y: auto; background: var(--cream); border-radius: 6px; box-shadow: 0 20px 60px rgba(0,0,0,0.22); padding: 24px; }
-    .modal-head { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 18px; }
-    .modal-head h2 { margin: 0; color: var(--green-800); font-size: 1.2rem; }
+    .modal-card { width: min(560px, 100%); max-height: 92vh; overflow-y: auto; background: var(--cream); border-radius: 6px; padding: 24px; }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .field { display: grid; gap: 5px; }
     .field.full { grid-column: 1 / -1; }
     .field label { font-size: 0.76rem; font-weight: 600; color: var(--green-800); }
     .field input[type="text"], .field input[type="number"], .field input[type="file"] { width: 100%; border: 1px solid var(--line); background: var(--white); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 0.88rem; outline: none; }
-    .field input:focus { border-color: var(--green-700); box-shadow: 0 0 0 2px rgba(20,81,62,0.12); }
-    .field label.checkbox { display: flex; align-items: center; gap: 6px; font-weight: 500; font-size: 0.85rem; }
-    .icon-preview { width: 40px; height: 40px; border-radius: var(--radius-sm); background: #efe9df; display: grid; place-items: center; overflow: hidden; font-family: var(--serif); font-size: 1rem; font-weight: 700; color: var(--green-800); margin-top: 6px; }
-    .icon-preview img { width: 100%; height: 100%; object-fit: cover; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
-    .modal-actions .btn-ghost { color: var(--green-800); border-color: var(--line); }
-    .modal-actions .btn-ghost:hover { background: #efe9df; }
-    .modal-error { margin: 10px 0 0; color: var(--red); font-size: 0.82rem; }
-    .toast { position: fixed; z-index: 200; left: 50%; bottom: 24px; transform: translate(-50%, 20px); background: var(--green-900); color: var(--white); border-radius: var(--radius); padding: 10px 16px; font-weight: 500; font-size: 0.85rem; opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease; }
+    
+    /* Scanner Styles */
+    #reader { width: 100%; max-width: 500px; margin: 0 auto; border-radius: 8px; overflow: hidden; border: 2px solid var(--green-800); }
+    .scan-result-box { text-align: center; margin-top: 20px; padding: 20px; border-radius: var(--radius); font-weight: bold; font-size: 1.1rem; }
+    .scan-success { background: #e6f0eb; color: #1c7a52; border: 1px solid #1c7a52; }
+    .scan-error { background: #fdf2f2; color: var(--red); border: 1px solid var(--red); }
+
+    .toast { position: fixed; z-index: 200; left: 50%; bottom: 24px; transform: translate(-50%, 20px); background: var(--green-900); color: var(--white); border-radius: var(--radius); padding: 10px 16px; font-size: 0.85rem; opacity: 0; pointer-events: none; transition: 0.2s; }
     .toast.show { opacity: 1; transform: translate(-50%, 0); }
-    @media (max-width: 820px) { .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .data-table { font-size: 0.8rem; } .data-table thead th, .data-table tbody td { padding: 9px 10px; } }
-    @media (max-width: 560px) { .container { width: min(100% - 24px, 1180px); } .form-grid { grid-template-columns: 1fr; } .field.full { grid-column: auto; } }
+    @media (max-width: 820px) { .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   </style>
 </head>
 <body>
   <header class="admin-header">
     <div class="container admin-header-inner">
-      <a class="brand" href="/">
-        <span class="brand-mark" aria-hidden="true">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square" stroke-linejoin="miter">
-            <path d="M12 3L6 11h3L5 17h14l-4-6h3L12 3z"/>
-            <path d="M12 17v4"/>
-          </svg>
-        </span>
-        <span>Festi Noël</span>
-        <span class="brand-divider" aria-hidden="true"></span>
-        <span class="brand-sub">Administration</span>
-      </a>
-      <div id="sessionArea" hidden>
-        <button id="logoutBtn" class="btn-ghost" type="button">Déconnexion</button>
-      </div>
+      <a class="brand" href="/"><span class="brand-mark">✦</span><span>Festi Noël</span><span class="brand-divider"></span><span class="brand-sub">Admin</span></a>
+      <div id="sessionArea" hidden><button id="logoutBtn" class="btn-ghost">Déconnexion</button></div>
     </div>
   </header>
 
   <main id="loginView">
     <div class="login-card">
       <h1>Administration</h1>
-      <p>Entrez le jeton d’administration configuré dans vos variables d’environnement.</p>
-      <form id="loginForm" novalidate>
+      <p>Entrez votre jeton d'accès sécurisé.</p>
+      <form id="loginForm">
         <label for="token">Jeton</label>
-        <input id="token" name="token" type="password" autocomplete="current-password" required />
+        <input id="token" type="password" required />
         <button type="submit" class="btn-primary">Se connecter</button>
-        <p class="login-error" id="loginError" hidden></p>
+        <p id="loginError" style="color:var(--red);font-size:0.8rem;margin-top:10px;" hidden></p>
       </form>
     </div>
   </main>
 
   <main id="dashboardView" hidden>
     <section class="container stats-grid" id="statsGrid"></section>
+    
     <div class="container">
       <div class="tabs" role="tablist">
         <button type="button" class="tab active" data-tab="orders">Commandes</button>
         <button type="button" class="tab" data-tab="tickets">Billets</button>
+        <button type="button" class="tab" data-tab="scanner">Scanner QR (Accès)</button>
       </div>
     </div>
 
@@ -164,12 +129,9 @@
         <span class="muted" style="font-size:.82rem" id="ordersCount"></span>
       </div>
       <table class="data-table">
-        <thead>
-          <tr><th>Code</th><th>Client</th><th>Date</th><th class="right">Billets</th><th class="right">Total</th><th>Statut</th><th></th></tr>
-        </thead>
+        <thead><tr><th>Code</th><th>Client</th><th>Date</th><th class="right">Billets</th><th class="right">Total</th><th>Statut</th><th></th></tr></thead>
         <tbody id="ordersBody"></tbody>
       </table>
-      <button class="load-more" id="loadMoreOrders" type="button" hidden>Charger plus</button>
     </section>
 
     <section class="container" id="ticketsTab" hidden>
@@ -178,60 +140,35 @@
         <span class="muted" style="font-size:.82rem" id="ticketsCount"></span>
       </div>
       <table class="data-table">
-        <thead>
-          <tr><th></th><th>Nom</th><th class="right">Prix</th><th class="right">Vendus</th><th class="right">Stock</th><th>Disponible</th><th></th></tr>
-        </thead>
+        <thead><tr><th>Nom</th><th class="right">Prix</th><th class="right">Vendus</th><th>Disponible</th><th></th></tr></thead>
         <tbody id="ticketsBody"></tbody>
       </table>
     </section>
+
+    <!-- THE NEW SCANNER TAB -->
+    <section class="container" id="scannerTab" hidden>
+      <div class="tab-toolbar">
+        <h2 style="font-size: 1.2rem; color: var(--green-800);">Scannez le QR Code du client</h2>
+      </div>
+      <div id="reader"></div>
+      <div id="scanResultBox" class="scan-result-box" hidden></div>
+      <p style="text-align:center; color:var(--muted); font-size:0.85rem; margin-top:15px;">Placez le QR code du client devant la caméra pour valider son accès.</p>
+    </section>
   </main>
 
-  <div class="modal" id="ticketModal" hidden role="dialog" aria-modal="true">
-    <div class="modal-card">
-      <div class="modal-head">
-        <h2 id="ticketModalTitle">Nouveau billet</h2>
-        <button class="icon-btn" id="closeTicketModal" type="button" aria-label="Fermer">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M6 6l12 12M18 6L6 18"/></svg>
-        </button>
-      </div>
-      <form id="ticketForm" novalidate>
-        <div class="form-grid">
-          <div class="field"><label for="f-name">Nom</label><input id="f-name" name="name" type="text" required /></div>
-          <div class="field"><label for="f-price">Prix (€)</label><input id="f-price" name="price" type="number" min="0" step="0.01" required /></div>
-          <div class="field full"><label for="f-description">Description</label><input id="f-description" name="description" type="text" /></div>
-          <div class="field"><label for="f-ageRange">Tranche d’âge</label><input id="f-ageRange" name="ageRange" type="text" /></div>
-          <div class="field"><label for="f-badge">Badge (optionnel)</label><input id="f-badge" name="badge" type="text" placeholder="Meilleure offre" /></div>
-          <div class="field full"><label for="f-perks">Avantages (séparés par virgule)</label><input id="f-perks" name="perks" type="text" /></div>
-          <div class="field"><label for="f-stock">Stock</label><input id="f-stock" name="stock" type="number" min="0" step="1" value="1000" /></div>
-          <div class="field" style="justify-content:flex-end">
-            <label class="checkbox"><input id="f-featured" name="featured" type="checkbox" /> Mettre en avant</label>
-            <label class="checkbox"><input id="f-available" name="available" type="checkbox" checked /> Disponible</label>
-          </div>
-          <div class="field full">
-            <label for="f-icon">Icône (image, moins de 100 Ko)</label>
-            <input id="f-icon" name="icon" type="file" accept="image/*" />
-            <div class="icon-preview" id="iconPreview"></div>
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="btn-ghost" id="cancelTicketBtn">Annuler</button>
-          <button type="submit" class="btn-primary" id="saveTicketBtn">Enregistrer</button>
-        </div>
-        <p class="modal-error" id="ticketError" hidden></p>
-      </form>
-    </div>
-  </div>
+  <div class="toast" id="toast"></div>
 
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
+  <script src="https://unpkg.com/html5-qrcode"></script>
   <script>
     const TOKEN_KEY = 'festi-admin-token';
-    const ORDER_PAGE_SIZE = 25;
     let token = sessionStorage.getItem(TOKEN_KEY) || '';
-    let allOrders = [], ordersSkip = 0, ordersTotal = 0, allTickets = [], editingTicketId = null, pendingIconBase64 = '', toastTimer;
+    let allOrders = [], allTickets = [];
+    let html5QrCode;
     const $ = (id) => document.getElementById(id);
-    const money = (v) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: v % 1 === 0 ? 0 : 2 }).format(v);
-    const dateFmt = (d) => new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(d));
+    
+    const money = (v) => new Intl.NumberFormat('fr-FR').format(v) + ' FRS';
+    const dateFmt = (d) => new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(d));
+    
     function authHeaders() { return { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }; }
     async function api(path, opts = {}) {
       const res = await fetch(path, { ...opts, headers: { ...authHeaders(), ...(opts.headers || {}) } });
@@ -240,197 +177,121 @@
       if (!res.ok) throw new Error(data.message || 'Erreur');
       return data;
     }
-    function showToast(msg) { clearTimeout(toastTimer); $('toast').textContent = msg; $('toast').classList.add('show'); toastTimer = setTimeout(() => $('toast').classList.remove('show'), 2400); }
-    function showError(el, msg) { el.textContent = msg; el.hidden = false; }
-    function clearError(el) { el.hidden = true; el.textContent = ''; }
+    function showToast(msg) { $('toast').textContent = msg; $('toast').classList.add('show'); setTimeout(() => $('toast').classList.remove('show'), 2500); }
+
     async function login(entered) {
       const res = await fetch('/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: entered }) });
-      if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data.message || 'Jeton incorrect'); }
+      if (!res.ok) throw new Error('Jeton incorrect');
       token = entered; sessionStorage.setItem(TOKEN_KEY, token); showDashboard();
     }
     function logout() { token = ''; sessionStorage.removeItem(TOKEN_KEY); showLogin(); }
     function showLogin() { $('loginView').hidden = false; $('dashboardView').hidden = true; $('sessionArea').hidden = true; }
     function showDashboard() { $('loginView').hidden = true; $('dashboardView').hidden = false; $('sessionArea').hidden = false; refreshAll(); }
-    async function refreshAll() { try { await Promise.all([loadStats(), loadOrders(true), loadTickets()]); } catch (err) { showToast(err.message || 'Erreur'); } }
+
+    async function refreshAll() { try { await Promise.all([loadStats(), loadOrders(), loadTickets()]); } catch (err) { showToast(err.message); } }
     async function loadStats() {
       const s = await api('/api/admin/stats');
       $('statsGrid').innerHTML = `
-        <div class="stat-card"><div class="label">Revenu total</div><div class="value">${money(s.revenue)}</div><div class="note">${s.orderCount} commande${s.orderCount === 1 ? '' : 's'}</div></div>
-        <div class="stat-card"><div class="label">Billets vendus</div><div class="value">${s.ticketsSold}</div><div class="note">sur ${s.ticketTypes} type${s.ticketTypes === 1 ? '' : 's'}</div></div>
-        <div class="stat-card"><div class="label">Commandes</div><div class="value">${s.orderCount}</div><div class="note">confirmées et en attente</div></div>
-        <div class="stat-card"><div class="label">Événement</div><div class="value">19 déc.</div><div class="note">2026</div></div>`;
+        <div class="stat-card"><div class="label">Revenu</div><div class="value">${money(s.revenue)}</div></div>
+        <div class="stat-card"><div class="label">Billets vendus</div><div class="value">${s.ticketsSold}</div></div>
+        <div class="stat-card"><div class="label">Commandes</div><div class="value">${s.orderCount}</div></div>
+        <div class="stat-card"><div class="label">Événement</div><div class="value">12 Déc.</div></div>`;
     }
-    async function loadOrders(reset = true) {
-      if (reset) { allOrders = []; ordersSkip = 0; }
-      const status = $('orderStatusFilter').value;
-      const params = new URLSearchParams({ limit: ORDER_PAGE_SIZE, skip: ordersSkip });
-      if (status) params.set('status', status);
-      const data = await api(`/api/admin/orders?${params}`);
-      allOrders = allOrders.concat(data.orders);
-      ordersSkip = allOrders.length;
-      ordersTotal = data.total;
-      renderOrders();
-    }
-    async function loadTickets() { allTickets = await api('/api/admin/tickets'); renderTickets(); }
-    function renderOrders() {
-      const body = $('ordersBody');
-      $('ordersCount').textContent = `${ordersTotal} commande${ordersTotal === 1 ? '' : 's'}`;
-      $('loadMoreOrders').hidden = allOrders.length >= ordersTotal;
-      if (!allOrders.length) { body.innerHTML = '<tr><td colspan="7" class="empty-row">Aucune commande pour le moment.</td></tr>'; return; }
-      body.innerHTML = allOrders.map((o) => {
-        const itemCount = o.items.reduce((s, i) => s + i.quantity, 0);
-        const c = o.customer || {};
-        return `<tr>
+    async function loadOrders() {
+      const data = await api('/api/admin/orders');
+      allOrders = data.orders; $('ordersCount').textContent = `${data.total} commandes`;
+      $('ordersBody').innerHTML = allOrders.map(o => `
+        <tr>
           <td><span class="mono">${o.orderCode}</span></td>
-          <td><div>${c.name || '—'}</div><div class="muted">${c.email || ''}</div></td>
-          <td class="muted">${dateFmt(o.createdAt)}</td>
-          <td class="right">${itemCount}</td>
-          <td class="right"><strong>${money(o.total)}</strong></td>
-          <td><select class="status-select" data-order-status="${o._id}">
-            <option value="confirmed" ${o.status === 'confirmed' ? 'selected' : ''}>Confirmée</option>
-            <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>En attente</option>
-            <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Annulée</option>
-          </select></td>
-          <td class="right"><button class="expand-toggle" type="button" data-toggle="${o._id}">Détails</button></td>
-        </tr>
-        <tr class="order-detail-row" data-detail="${o._id}" hidden>
-          <td colspan="7"><div class="order-detail-inner">
-            <strong>Contenu de la commande</strong>
-            <ul class="order-detail-list">${o.items.map((i) => {
-              const name = i.ticketId?.name || 'Billet';
-              return `<li><span>${i.quantity} × ${name}</span><span>${money(i.price * i.quantity)}</span></li>`;
-            }).join('')}</ul>
-          </div></td>
-        </tr>`;
-      }).join('');
+          <td>${o.customer.name}<br><small>${o.customer.phone}</small></td>
+          <td>${dateFmt(o.createdAt)}</td>
+          <td class="right">${o.items.reduce((s, i) => s + i.quantity, 0)}</td>
+          <td class="right">${money(o.total)}</td>
+          <td><span style="font-weight:600; color:${o.status === 'confirmed' ? 'green' : 'orange'}">${o.status === 'confirmed' ? 'Payé' : 'En attente'}</span></td>
+          <td><button class="expand-toggle" onclick="alert('${o.items.map(i => `${i.quantity}x ${i.ticketId?.name}`).join('\\n')}')">Détails</button></td>
+        </tr>`).join('');
     }
-    function renderTickets() {
-      const body = $('ticketsBody');
-      $('ticketsCount').textContent = `${allTickets.length} billet${allTickets.length === 1 ? '' : 's'}`;
-      if (!allTickets.length) { body.innerHTML = '<tr><td colspan="7" class="empty-row">Aucun billet en catalogue.</td></tr>'; return; }
-      body.innerHTML = allTickets.map((t) => {
-        const icon = t.iconBase64 ? `<img src="${t.iconBase64}" alt="" />` : t.name.charAt(0).toUpperCase();
-        return `<tr>
-          <td><div class="ticket-icon-cell">${icon}</div></td>
-          <td><div>${t.name}</div><div class="muted">${t.ageRange || ''}</div></td>
+    async function loadTickets() {
+      allTickets = await api('/api/admin/tickets');
+      $('ticketsBody').innerHTML = allTickets.map(t => `
+        <tr>
+          <td>${t.name}</td>
           <td class="right">${money(t.price)}</td>
           <td class="right">${t.sold || 0}</td>
-          <td class="right">${t.stock ?? '—'}</td>
-          <td><label class="toggle-pill"><input type="checkbox" data-toggle-available="${t._id}" ${t.available ? 'checked' : ''} />${t.available ? 'En vente' : 'Masqué'}</label></td>
-          <td class="right">
-            <button class="icon-btn" type="button" data-edit-ticket="${t._id}" aria-label="Modifier">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M4 20h4l10-10-4-4L4 16v4z"/></svg>
-            </button>
-            <button class="icon-btn" type="button" data-delete-ticket="${t._id}" aria-label="Supprimer">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
-            </button>
-          </td>
-        </tr>`;
-      }).join('');
+          <td>${t.available ? 'Oui' : 'Non'}</td>
+          <td class="right"><button class="icon-btn" onclick="alert('Fonction d\'édition à venir.')">✎</button></td>
+        </tr>`).join('');
     }
-    $('loginForm').addEventListener('submit', async (e) => { e.preventDefault(); clearError($('loginError')); try { await login($('token').value.trim()); } catch (err) { showError($('loginError'), err.message); } });
+
+    // --- QR SCANNER LOGIC ---
+    function startScanner() {
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("reader");
+      }
+      
+      html5QrCode.start(
+        { facingMode: "environment" }, 
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        onScanSuccess,
+        (errorMessage) => { /* ignore errors */ }
+      ).catch(err => {
+        showToast("Erreur caméra : " + err);
+      });
+    }
+
+    function stopScanner() {
+      if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop().then(() => { html5QrCode.clear(); }).catch(() => {});
+      }
+    }
+
+    async function onScanSuccess(decodedText) {
+      // Pause scanner to prevent multiple scans
+      html5QrCode.pause(true);
+      const box = $('scanResultBox');
+      box.hidden = false;
+      box.className = 'scan-result-box';
+      box.textContent = "Vérification du billet...";
+      box.style.color = 'var(--muted)';
+
+      try {
+        const res = await api('/api/admin/scan', { method: 'POST', body: JSON.stringify({ orderCode: decodedText }) });
+        box.className = 'scan-result-box scan-success';
+        box.innerHTML = `✅ ACCÈS AUTORISÉ<br><span style="font-size:0.9rem">${res.customer}</span>`;
+        showToast('Accès validé');
+      } catch (err) {
+        box.className = 'scan-result-box scan-error';
+        box.innerHTML = `❌ ACCÈS REFUSÉ<br><span style="font-size:0.9rem">${err.message}</span>`;
+      }
+      
+      // Resume scanning after 3 seconds
+      setTimeout(() => { 
+        box.hidden = true; 
+        if (html5QrCode) html5QrCode.resume(); 
+      }, 3000);
+    }
+
+    // Event Listeners
+    $('loginForm').addEventListener('submit', async (e) => { 
+      e.preventDefault(); $('loginError').hidden = true;
+      try { await login($('token').value.trim()); } catch (err) { $('loginError').textContent = err.message; $('loginError').hidden = false; } 
+    });
     $('logoutBtn').addEventListener('click', logout);
-    document.querySelectorAll('.tab').forEach((tab) => {
+    
+    document.querySelectorAll('.tab').forEach(tab => {
       tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         const target = tab.dataset.tab;
         $('ordersTab').hidden = target !== 'orders';
         $('ticketsTab').hidden = target !== 'tickets';
+        $('scannerTab').hidden = target !== 'scanner';
+
+        if (target === 'scanner') startScanner();
+        else stopScanner();
       });
     });
-    $('orderStatusFilter').addEventListener('change', () => loadOrders(true));
-    $('loadMoreOrders').addEventListener('click', () => loadOrders(false));
-    $('ordersBody').addEventListener('change', async (e) => {
-      const sel = e.target.closest('[data-order-status]');
-      if (!sel) return;
-      try { await api(`/api/admin/orders/${sel.dataset.orderStatus}/status`, { method: 'PATCH', body: JSON.stringify({ status: sel.value }) }); showToast('Statut mis à jour'); loadStats(); loadOrders(true); } catch (err) { showToast(err.message || 'Erreur'); }
-    });
-    $('ordersBody').addEventListener('click', (e) => {
-      const t = e.target.closest('[data-toggle]');
-      if (!t) return;
-      const row = document.querySelector(`[data-detail="${t.dataset.toggle}"]`);
-      if (row) row.hidden = !row.hidden;
-    });
-    $('newTicketBtn').addEventListener('click', () => openTicketModal(null));
-    $('ticketsBody').addEventListener('click', async (e) => {
-      const edit = e.target.closest('[data-edit-ticket]');
-      if (edit) { const t = allTickets.find((x) => x._id === edit.dataset.editTicket); if (t) openTicketModal(t); return; }
-      const del = e.target.closest('[data-delete-ticket]');
-      if (del) {
-        const t = allTickets.find((x) => x._id === del.dataset.deleteTicket);
-        if (!t || !confirm(`Supprimer « ${t.name} » ? Cette action est irréversible.`)) return;
-        try { await api(`/api/admin/tickets/${t._id}`, { method: 'DELETE' }); showToast('Billet supprimé'); loadTickets(); loadStats(); } catch (err) { showToast(err.message || 'Erreur'); }
-      }
-    });
-    $('ticketsBody').addEventListener('change', async (e) => {
-      const toggle = e.target.closest('[data-toggle-available]');
-      if (!toggle) return;
-      try { await api(`/api/admin/tickets/${toggle.dataset.toggleAvailable}`, { method: 'PATCH', body: JSON.stringify({ available: toggle.checked }) }); showToast(toggle.checked ? 'Billet remis en vente' : 'Billet masqué'); loadTickets(); } catch (err) { showToast(err.message || 'Erreur'); }
-    });
-    function openTicketModal(ticket) {
-      editingTicketId = ticket ? ticket._id : null;
-      pendingIconBase64 = ticket ? ticket.iconBase64 || '' : '';
-      $('ticketModalTitle').textContent = ticket ? 'Modifier le billet' : 'Nouveau billet';
-      $('f-name').value = ticket?.name || '';
-      $('f-price').value = ticket?.price ?? '';
-      $('f-description').value = ticket?.description || '';
-      $('f-ageRange').value = ticket?.ageRange || '';
-      $('f-badge').value = ticket?.badge || '';
-      $('f-perks').value = (ticket?.perks || []).join(', ');
-      $('f-stock').value = ticket?.stock ?? 1000;
-      $('f-featured').checked = !!ticket?.featured;
-      $('f-available').checked = ticket ? !!ticket.available : true;
-      $('f-icon').value = '';
-      renderIconPreview();
-      clearError($('ticketError'));
-      $('ticketModal').hidden = false;
-    }
-    function closeTicketModal() { $('ticketModal').hidden = true; editingTicketId = null; pendingIconBase64 = ''; $('ticketForm').reset(); }
-    function renderIconPreview() {
-      const p = $('iconPreview');
-      if (pendingIconBase64) p.innerHTML = `<img src="${pendingIconBase64}" alt="" />`;
-      else { const n = $('f-name').value.trim(); p.textContent = n ? n.charAt(0).toUpperCase() : '·'; }
-    }
-    $('f-name').addEventListener('input', renderIconPreview);
-    $('f-icon').addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      if (!file.type.startsWith('image/')) { showError($('ticketError'), 'Veuillez sélectionner une image.'); e.target.value = ''; return; }
-      if (file.size > 100 * 1024) { showError($('ticketError'), 'Image trop volumineuse (max 100 Ko).'); e.target.value = ''; return; }
-      clearError($('ticketError'));
-      const reader = new FileReader();
-      reader.onload = () => { pendingIconBase64 = reader.result; renderIconPreview(); };
-      reader.readAsDataURL(file);
-    });
-    $('closeTicketModal').addEventListener('click', closeTicketModal);
-    $('cancelTicketBtn').addEventListener('click', closeTicketModal);
-    $('ticketModal').addEventListener('click', (e) => { if (e.target === $('ticketModal')) closeTicketModal(); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('ticketModal').hidden) closeTicketModal(); });
-    $('ticketForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      clearError($('ticketError'));
-      const payload = {
-        name: $('f-name').value.trim(),
-        price: Number($('f-price').value),
-        description: $('f-description').value.trim(),
-        ageRange: $('f-ageRange').value.trim(),
-        badge: $('f-badge').value.trim(),
-        perks: $('f-perks').value.split(',').map((s) => s.trim()).filter(Boolean),
-        stock: Number($('f-stock').value) || 0,
-        featured: $('f-featured').checked,
-        available: $('f-available').checked,
-        iconBase64: pendingIconBase64
-      };
-      if (!payload.name || !Number.isFinite(payload.price)) { showError($('ticketError'), 'Nom et prix sont requis.'); return; }
-      $('saveTicketBtn').disabled = true;
-      try {
-        if (editingTicketId) { await api(`/api/admin/tickets/${editingTicketId}`, { method: 'PATCH', body: JSON.stringify(payload) }); showToast('Billet mis à jour'); }
-        else { await api('/api/admin/tickets', { method: 'POST', body: JSON.stringify(payload) }); showToast('Billet créé'); }
-        closeTicketModal(); loadTickets(); loadStats();
-      } catch (err) { showError($('ticketError'), err.message || 'Erreur'); }
-      finally { $('saveTicketBtn').disabled = false; }
-    });
+
     if (token) showDashboard(); else showLogin();
   </script>
 </body>
