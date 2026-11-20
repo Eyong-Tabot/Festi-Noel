@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+  <!-- Library to generate QR codes directly in the browser -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     :root {
       --green-900: #06281f; --green-800: #0b3d2e; --green-700: #14513e;
@@ -91,10 +93,6 @@
     .programme-card { background: var(--green-800); padding: 22px; }
     .programme-card h3 { margin: 0 0 6px; font-size: 1.05rem; font-weight: 700; }
     .programme-card p { margin: 0; color: rgba(255,255,255,0.6); font-size: 0.88rem; }
-    .payment-section { background: #f6f2e9; padding: 60px 0; text-align: center; }
-    .payment-box { background: var(--white); border: 2px solid var(--gold); border-radius: var(--radius); padding: 30px; max-width: 600px; margin: 0 auto; }
-    .payment-box h3 { color: var(--green-800); margin-top: 0; font-size: 1.4rem; }
-    .payment-number { font-family: monospace; font-size: 1.2rem; font-weight: 700; color: var(--red); margin: 10px 0; display: block; }
     footer { background: var(--green-900); color: rgba(255,255,255,0.62); padding: 36px 0; font-size: 0.88rem; }
     .footer-inner { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; text-align: center; }
     .footer-inner strong { color: var(--white); }
@@ -138,11 +136,6 @@
     .field input { width: 100%; border: 1px solid var(--line); background: var(--white); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 0.92rem; color: var(--ink); outline: none; }
     .field input:focus { border-color: var(--green-700); box-shadow: 0 0 0 2px rgba(20,81,62,0.12); }
     .checkout-submit { width: 100%; margin-top: 16px; }
-    .success-view { text-align: center; padding: 18px 4px 6px; }
-    .success-icon { width: 56px; height: 56px; border-radius: var(--radius); background: #e6f0eb; color: #1c7a52; display: grid; place-items: center; margin: 0 auto 16px; }
-    .success-view h3 { margin: 0 0 6px; color: var(--green-800); font-size: 1.3rem; font-weight: 700; }
-    .success-view p { margin: 0 0 4px; color: var(--muted); font-size: 0.9rem; }
-    .order-code { display: inline-block; margin: 14px 0 20px; background: var(--white); border: 1px solid var(--line); border-left: 3px solid var(--gold-dark); border-radius: var(--radius-sm); padding: 8px 14px; color: var(--green-800); font-family: ui-monospace, "SF Mono", Menlo, monospace; font-weight: 700; letter-spacing: 0.06em; font-size: 0.9rem; }
     .toast { position: fixed; z-index: 200; left: 50%; bottom: 24px; transform: translate(-50%, 20px); background: var(--green-900); color: var(--white); border-radius: var(--radius); padding: 10px 16px; font-weight: 500; font-size: 0.85rem; opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease; }
     .toast.show { opacity: 1; transform: translate(-50%, 0); }
     @media (max-width: 980px) { .ticket-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .nav a { display: none; } }
@@ -218,16 +211,17 @@
       </div>
     </section>
 
+    <!-- My Tickets Section -->
     <section class="section" id="find-ticket" style="background: var(--green-800); color: white;">
       <div class="container" style="max-width: 600px; text-align: center;">
         <div class="eyebrow" style="color: var(--gold);">Mes Billets</div>
-        <h2 style="color: white; margin-bottom: 10px;">Recherchez vos billets</h2>
-        <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">Entrez le code FESTI-XXXXXX de votre billet.</p>
-        <form id="findTicketForm" style="display: flex; gap: 10px;">
-          <input type="text" id="findTicketInput" placeholder="FESTI-A1B2C3" style="flex: 1; padding: 12px; border-radius: 4px; border: none; font-family: monospace; font-size: 1rem; text-transform: uppercase;">
+        <h2 style="color: white; margin-bottom: 10px;">Retrouvez vos billets</h2>
+        <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">Entrez votre numéro de téléphone pour voir toutes vos commandes.</p>
+        <form id="findTicketForm" style="display: flex; gap: 10px; margin-bottom: 25px;">
+          <input type="tel" id="findTicketInput" placeholder="6 XX XX XX XX" style="flex: 1; padding: 12px; border-radius: 4px; border: none; font-size: 1rem;">
           <button type="submit" class="btn btn-primary">Rechercher</button>
         </form>
-        <div id="findResult" style="margin-top: 20px; font-weight: 600;"></div>
+        <div id="ticketList" style="text-align: left; display: grid; gap: 10px;"></div>
       </div>
     </section>
   </main>
@@ -241,6 +235,7 @@
 
   <div class="overlay" id="overlay" hidden></div>
 
+  <!-- Cart Drawer -->
   <aside class="cart-drawer" id="cartDrawer" aria-hidden="true">
     <div class="drawer-head">
       <h2>Votre panier</h2>
@@ -254,22 +249,31 @@
     </div>
   </aside>
 
-  <div class="modal" id="checkoutModal" hidden role="dialog" aria-modal="true">
+  <!-- Checkout Modal -->
+  <div class="modal" id="checkoutModal" hidden>
     <div class="modal-card">
-      <div id="checkoutFormView">
-        <div class="modal-head">
-          <div><h2 id="checkoutTitle">Finaliser la commande</h2><p>Renseignez vos informations pour réserver.</p></div>
-          <button class="icon-btn" id="closeCheckoutBtn" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-        </div>
-        <div class="summary-box" id="checkoutSummary"></div>
-        <form id="checkoutForm" novalidate>
-          <div class="form-grid">
-            <div class="field full"><label for="name">Nom complet</label><input id="name" name="name" type="text" required placeholder="Marie Dupont" /></div>
-            <div class="field full"><label for="phone">Numéro de téléphone</label><input id="phone" name="phone" type="tel" required placeholder="6 XX XX XX XX" /></div>
-          </div>
-          <button class="btn btn-primary checkout-submit" type="submit">Payer avec SasaPay</button>
-        </form>
+      <div class="modal-head">
+        <div><h2>Finaliser la commande</h2><p>Renseignez vos informations pour réserver.</p></div>
+        <button class="icon-btn" id="closeCheckoutBtn" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       </div>
+      <div class="summary-box" id="checkoutSummary"></div>
+      <form id="checkoutForm" novalidate>
+        <div class="form-grid">
+          <div class="field full"><label for="name">Nom complet</label><input id="name" name="name" type="text" required placeholder="Marie Dupont" /></div>
+          <div class="field full"><label for="phone">Numéro de téléphone (MoMo/OM)</label><input id="phone" name="phone" type="tel" required placeholder="6 XX XX XX XX" /></div>
+        </div>
+        <button class="btn btn-primary checkout-submit" type="submit">Payer avec SasaPay</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- QR Code Display Modal -->
+  <div class="modal" id="qrModal" hidden>
+    <div class="modal-card" style="text-align: center;">
+      <h2 style="margin-top:0; color:var(--green-800); font-family:var(--serif);">Votre Billet</h2>
+      <p style="font-family:monospace; font-weight:700; font-size:1.1rem; color:var(--red); margin-bottom:20px;" id="qrOrderCode"></p>
+      <div id="qrcode-container" style="display: flex; justify-content: center; margin-bottom: 20px; background: white; padding: 15px; border-radius: 8px;"></div>
+      <button class="btn btn-dark" style="width: 100%;" onclick="document.getElementById('qrModal').hidden = true; document.getElementById('overlay').hidden = true; document.body.classList.remove('locked');">Fermer</button>
     </div>
   </div>
 
@@ -286,7 +290,6 @@
     const checkoutBtn = document.getElementById('checkoutBtn');
     const checkoutModal = document.getElementById('checkoutModal');
     const checkoutSummary = document.getElementById('checkoutSummary');
-    const checkoutFormView = document.getElementById('checkoutFormView');
     const checkoutForm = document.getElementById('checkoutForm');
     const toast = document.getElementById('toast');
     let tickets = [];
@@ -349,7 +352,7 @@
     function changeQuantity(id, delta) { if (!getTicket(id)) return; cart[id] = (cart[id] || 0) + delta; if (cart[id] <= 0) delete cart[id]; saveCart(); renderCart(); if (!cartCountValue()) closeCart(); }
     function setOverlay(show) { overlay.hidden = !show; document.body.classList.toggle('locked', show); }
     function openCart() { setOverlay(true); cartDrawer.classList.add('open'); cartDrawer.setAttribute('aria-hidden', 'false'); }
-    function closeCart() { cartDrawer.classList.remove('open'); cartDrawer.setAttribute('aria-hidden', 'true'); if (checkoutModal.hidden) setOverlay(false); }
+    function closeCart() { cartDrawer.classList.remove('open'); cartDrawer.setAttribute('aria-hidden', 'true'); if (checkoutModal.hidden && document.getElementById('qrModal').hidden) setOverlay(false); }
     
     function renderCheckoutSummary() {
       const entries = Object.entries(cart).filter(([id, qty]) => qty > 0 && getTicket(id));
@@ -370,35 +373,74 @@
     document.getElementById('closeCartBtn').addEventListener('click', closeCart);
     checkoutBtn.addEventListener('click', openCheckout);
     document.getElementById('closeCheckoutBtn').addEventListener('click', closeCheckout);
-    overlay.addEventListener('click', () => { if (!checkoutModal.hidden) closeCheckout(); else closeCart(); });
+    overlay.addEventListener('click', () => { if (!checkoutModal.hidden) closeCheckout(); else if (!document.getElementById('qrModal').hidden) document.getElementById('qrModal').hidden = true, setOverlay(false); else closeCart(); });
     
+    // --- TICKET FINDER LOGIC ---
+    const savedPhone = localStorage.getItem('festi-user-phone');
+    if (savedPhone) document.getElementById('findTicketInput').value = savedPhone;
+
     document.getElementById('findTicketForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const code = document.getElementById('findTicketInput').value.trim().toUpperCase();
-      const resDiv = document.getElementById('findResult');
-      if (!code) return;
-      resDiv.textContent = 'Recherche...';
-      resDiv.style.color = 'white';
+      const phone = document.getElementById('findTicketInput').value.trim();
+      const listDiv = document.getElementById('ticketList');
+      if (!phone) return;
+      
+      listDiv.innerHTML = '<p style="text-align:center; color:var(--gold);">Recherche en cours...</p>';
+      
       try {
-        const res = await fetch(`${API}/orders/${code}`);
-        if (!res.ok) throw new Error('Introuvable');
-        const data = await res.json();
-        resDiv.innerHTML = `<span style="color:var(--gold);">✅ Réservation trouvée pour ${data.customer.name}.</span><br>
-        <span style="font-size:0.9rem; color:rgba(255,255,255,0.8);">Statut : ${data.status === 'confirmed' ? 'Payé et Confirmé' : 'En attente de paiement'}</span>`;
+        const res = await fetch(`${API}/orders/phone/${phone}`);
+        const orders = await res.json();
+        
+        if (!orders.length) {
+          listDiv.innerHTML = '<p style="text-align:center; color:#ff6b6b;">Aucun billet trouvé pour ce numéro.</p>';
+          return;
+        }
+        
+        listDiv.innerHTML = orders.map(o => `
+          <div style="background: rgba(255,255,255,0.1); padding: 15px; margin-bottom: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid ${o.status === 'confirmed' ? 'var(--gold)' : 'orange'};">
+            <div>
+              <strong style="color: var(--gold); font-size: 1.1rem;">${o.orderCode}</strong><br>
+              <span style="font-size: 0.85rem; color: rgba(255,255,255,0.8);">${o.items.reduce((s, i) => s + i.quantity, 0)} billet(s) - ${o.status === 'confirmed' ? 'Confirmé' : 'En attente'}</span>
+            </div>
+            ${o.status === 'confirmed' ? `<button class="btn btn-primary" style="padding: 8px 12px; font-size: 0.85rem;" onclick="showQR('${o.orderCode}')">Voir QR</button>` : ''}
+          </div>
+        `).join('');
       } catch (err) {
-        resDiv.innerHTML = `<span style="color:#ff6b6b;">Code introuvable. Vérifiez et réessayez.</span>`;
+        listDiv.innerHTML = '<p style="text-align:center; color:#ff6b6b;">Erreur de connexion. Veuillez réessayer.</p>';
       }
     });
 
-    // SasaPay Redirect Logic
+    // --- SHOW QR CODE MODAL ---
+    function showQR(code) {
+      document.getElementById('qrOrderCode').textContent = code;
+      const qrDiv = document.getElementById('qrcode-container');
+      qrDiv.innerHTML = ''; 
+      
+      new QRCode(qrDiv, {
+        text: code,
+        width: 200,
+        height: 200,
+        colorDark : "#0b3d2e",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
+      });
+      
+      document.getElementById('qrModal').hidden = false;
+      setOverlay(true);
+    }
+
+    // --- CHECKOUT (SasaPay) ---
     checkoutForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!checkoutForm.checkValidity()) { checkoutForm.reportValidity(); return; }
       
+      const phoneVal = document.getElementById('phone').value.trim();
+      localStorage.setItem('festi-user-phone', phoneVal); 
+      
       const payload = { 
         customer: { 
           name: document.getElementById('name').value.trim(), 
-          phone: document.getElementById('phone').value.trim() 
+          phone: phoneVal
         }, 
         items: Object.entries(cart).filter(([, qty]) => qty > 0).map(([ticketId, quantity]) => ({ ticketId, quantity })) 
       };
