@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Festi Noël — Billetterie</title>
-  <meta name="description" content="Réservez vos billets pour Festi Noël : spectacles, marché de Noël, animations et concerts." />
+  <meta name="description" content="Réservez vos billets pour Festi Noël : musique, jeux, barbecue, feu de camp et cinéma." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
@@ -67,7 +67,7 @@
     .eyebrow { color: var(--red); font-weight: 700; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; }
     .section h2 { margin: 0 0 12px; color: var(--green-800); font-size: clamp(1.9rem, 3.6vw, 2.6rem); line-height: 1.1; font-weight: 700; }
     .section-head p { margin: 0; color: var(--muted); font-size: 1rem; }
-    .ticket-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+    .ticket-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
     .ticket-card { position: relative; display: flex; flex-direction: column; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
     .ticket-card:hover { border-color: rgba(11,61,46,0.28); box-shadow: var(--shadow); }
     .ticket-card.featured { border-color: var(--gold-dark); background: #fffdf7; }
@@ -87,23 +87,18 @@
     .programme-section .eyebrow { color: var(--gold); }
     .programme-section h2 { color: var(--white); }
     .programme-section .section-head p { color: rgba(255,255,255,0.62); }
-    .programme-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: rgba(255,255,255,0.12); border-radius: var(--radius); overflow: hidden; }
+    .programme-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: rgba(255,255,255,0.12); border-radius: var(--radius); overflow: hidden; }
     .programme-card { background: var(--green-800); padding: 22px; }
-    .programme-card time { display: inline-block; color: var(--gold); font-weight: 700; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
     .programme-card h3 { margin: 0 0 6px; font-size: 1.05rem; font-weight: 700; }
     .programme-card p { margin: 0; color: rgba(255,255,255,0.6); font-size: 0.88rem; }
-    .faq-list { display: grid; gap: 8px; max-width: 820px; }
-    details { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; }
-    summary { cursor: pointer; font-weight: 600; color: var(--green-800); list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 0.95rem; }
-    summary::-webkit-details-marker { display: none; }
-    summary::after { content: "+"; color: var(--red); font-size: 1.2rem; line-height: 1; }
-    details[open] summary::after { content: "−"; }
-    details p { margin: 12px 0 0; color: var(--muted); font-size: 0.92rem; }
+    .payment-section { background: #f6f2e9; padding: 60px 0; text-align: center; }
+    .payment-box { background: var(--white); border: 2px solid var(--gold); border-radius: var(--radius); padding: 30px; max-width: 600px; margin: 0 auto; }
+    .payment-box h3 { color: var(--green-800); margin-top: 0; font-size: 1.4rem; }
+    .payment-number { font-family: monospace; font-size: 1.2rem; font-weight: 700; color: var(--red); margin: 10px 0; display: block; }
     footer { background: var(--green-900); color: rgba(255,255,255,0.62); padding: 36px 0; font-size: 0.88rem; }
-    .footer-inner { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .footer-inner { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; text-align: center; }
     .footer-inner strong { color: var(--white); }
     .footer-inner a { color: var(--gold); text-decoration: none; }
-    .footer-inner a:hover { text-decoration: underline; }
     .overlay { position: fixed; inset: 0; z-index: 90; background: rgba(6,40,31,0.5); }
     .cart-drawer { position: fixed; z-index: 100; top: 0; right: 0; height: 100%; width: min(420px, 100%); background: var(--cream); transform: translateX(105%); transition: transform 0.25s ease; display: flex; flex-direction: column; box-shadow: -10px 0 40px rgba(0,0,0,0.15); }
     .cart-drawer.open { transform: translateX(0); }
@@ -128,7 +123,7 @@
     .drawer-footer .btn { width: 100%; }
     .demo-note { margin: 10px 0 0; text-align: center; color: var(--muted); font-size: 0.72rem; }
     .modal { position: fixed; z-index: 110; inset: 0; display: grid; place-items: center; padding: 20px; }
-    .modal-card { width: min(520px, 100%); max-height: min(92vh, 760px); overflow-y: auto; background: var(--cream); border-radius: 6px; box-shadow: 0 20px 60px rgba(0,0,0,0.22); padding: 26px; }
+    .modal-card { width: min(520px, 100%); max-height: min(92vh, 760px); overflow-y: auto; background: var(--cream); border-radius: 6px; box-shadow: 0 20px 60px rgba(0,0,0,0.22); padding: 26px; position: relative; }
     .modal-head { display: flex; justify-content: space-between; align-items: start; gap: 16px; margin-bottom: 20px; }
     .modal-head h2 { margin: 0; color: var(--green-800); font-size: 1.3rem; font-weight: 700; }
     .modal-head p { margin: 3px 0 0; color: var(--muted); font-size: 0.85rem; }
@@ -150,7 +145,7 @@
     .order-code { display: inline-block; margin: 14px 0 20px; background: var(--white); border: 1px solid var(--line); border-left: 3px solid var(--gold-dark); border-radius: var(--radius-sm); padding: 8px 14px; color: var(--green-800); font-family: ui-monospace, "SF Mono", Menlo, monospace; font-weight: 700; letter-spacing: 0.06em; font-size: 0.9rem; }
     .toast { position: fixed; z-index: 200; left: 50%; bottom: 24px; transform: translate(-50%, 20px); background: var(--green-900); color: var(--white); border-radius: var(--radius); padding: 10px 16px; font-weight: 500; font-size: 0.85rem; opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease; }
     .toast.show { opacity: 1; transform: translate(-50%, 0); }
-    @media (max-width: 980px) { .ticket-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .programme-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .nav a { display: none; } }
+    @media (max-width: 980px) { .ticket-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .nav a { display: none; } }
     @media (max-width: 640px) { .container { width: min(100% - 28px, 1160px); } .hero { padding: 64px 0 78px; } .hero-stats { grid-template-columns: 1fr; } .ticket-grid, .programme-grid { grid-template-columns: 1fr; } .form-grid { grid-template-columns: 1fr; } .field.full { grid-column: auto; } .section { padding: 60px 0; } .cart-btn .cart-label { display: none; } }
   </style>
 </head>
@@ -161,23 +156,16 @@
     <div class="container header-inner">
       <a class="brand" href="#accueil">
         <span class="brand-mark" aria-hidden="true">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" stroke-linejoin="miter">
-            <path d="M12 3L6 11h3L5 17h14l-4-6h3L12 3z"/>
-            <path d="M12 17v4"/>
-          </svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" stroke-linejoin="miter"><path d="M12 3L6 11h3L5 17h14l-4-6h3L12 3z"/><path d="M12 17v4"/></svg>
         </span>
         <span>Festi Noël</span>
       </a>
       <nav class="nav">
         <a href="#billets">Billets</a>
         <a href="#programme">Programme</a>
-        <a href="#faq">FAQ</a>
+        <a href="#find-ticket">Mes Billets</a>
         <button class="cart-btn" id="openCartBtn" type="button">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
-            <path d="M3 4h2l2.5 11h11l2-8H6"/>
-            <circle cx="10" cy="19" r="1"/>
-            <circle cx="17" cy="19" r="1"/>
-          </svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M3 4h2l2.5 11h11l2-8H6"/><circle cx="10" cy="19" r="1"/><circle cx="17" cy="19" r="1"/></svg>
           <span class="cart-label">Panier</span>
           <span class="cart-count" id="cartCount">0</span>
         </button>
@@ -188,17 +176,17 @@
   <main>
     <section class="hero" id="accueil">
       <div class="container hero-content">
-        <div class="badge">19 décembre 2026 · Place du Village</div>
-        <h1>La magie de Noël.<br /><span>Vos billets.</span></h1>
-        <p>Une journée féerique avec spectacles, marché de Noël, concerts, animations pour enfants et une grande parade illuminée. Réservez vos billets en quelques secondes.</p>
+        <div class="badge">CEMREC x AEMAS PRESENTS · 12 DÉC 2026 · 18H00</div>
+        <h1>Festi Noël.<br /><span>La magie d'une soirée.</span></h1>
+        <p>Une soirée de musique, de jeux, de feu de camp, de barbecue et de cinéma. Réservez votre place avant le grand soir.</p>
         <div class="hero-actions">
-          <a class="btn btn-primary" href="#billets">Réserver mes billets</a>
-          <a class="btn btn-secondary" href="#programme">Voir le programme</a>
+          <a class="btn btn-primary" href="#billets">Acheter un billet</a>
+          <a class="btn btn-secondary" href="#find-ticket">Retrouver mes billets</a>
         </div>
         <div class="hero-stats">
-          <div class="stat"><strong id="countdown">J-30</strong><span>avant l’ouverture</span></div>
-          <div class="stat"><strong>14h – 22h</strong><span>huit heures de féerie</span></div>
-          <div class="stat"><strong>Gratuit – 3 ans</strong><span>pour les tout-petits</span></div>
+          <div class="stat"><strong id="countdown">J-30</strong><span>avant le grand soir</span></div>
+          <div class="stat"><strong>18h00</strong><span>Ouverture des portes</span></div>
+          <div class="stat"><strong>Lycée Technique</strong><span>Retrouvez-nous sur place</span></div>
         </div>
       </div>
     </section>
@@ -207,8 +195,8 @@
       <div class="container">
         <div class="section-head">
           <div class="eyebrow">Billetterie</div>
-          <h2>Choisissez votre expérience</h2>
-          <p>Des billets simples et des pass famille pour profiter de toutes les animations.</p>
+          <h2>Choisissez votre formule</h2>
+          <p>Des billets simples et des packs pour profiter de toutes les animations.</p>
         </div>
         <div class="ticket-grid" id="ticketGrid"></div>
       </div>
@@ -218,31 +206,53 @@
       <div class="container">
         <div class="section-head">
           <div class="eyebrow">Au programme</div>
-          <h2>Une journée à ne pas manquer</h2>
-          <p>Spectacles, musique et animations pour toute la famille.</p>
+          <h2>Une soirée, quatre moments</h2>
+          <p>Musique, feu de camp, barbecue et cinéma sous les étoiles.</p>
         </div>
         <div class="programme-grid">
-          <article class="programme-card"><time>14h00</time><h3>Ouverture du marché</h3><p>Chalets de créateurs, chocolat chaud et illuminations.</p></article>
-          <article class="programme-card"><time>15h30</time><h3>Spectacle des lutins</h3><p>Un show interactif pour les enfants au grand chapiteau.</p></article>
-          <article class="programme-card"><time>17h00</time><h3>Parade illuminée</h3><p>Chars, fanfare et arrivée du Père Noël sur la place.</p></article>
-          <article class="programme-card"><time>18h30</time><h3>Concert de Noël</h3><p>Chants traditionnels et reprises pop par la chorale locale.</p></article>
-          <article class="programme-card"><time>20h00</time><h3>Feu d’artifice</h3><p>Un final féerique au-dessus du village.</p></article>
-          <article class="programme-card"><time>20h30</time><h3>Soirée dansante</h3><p>DJ set festif et village gourmand jusqu’à 22h.</p></article>
+          <article class="programme-card"><h3>Musique & Jeux</h3><p>Ambiance festive, jeux et animations pour toute la famille.</p></article>
+          <article class="programme-card"><h3>Feu de Camp</h3><p>Chants, histoires et chaleur autour du feu de camp.</p></article>
+          <article class="programme-card"><h3>Barbecue</h3><p>Grillades et spécialités pour ravir vos papilles.</p></article>
+          <article class="programme-card"><h3>Soirée Cinéma</h3><p>Une projection de Noël sous les étoiles pour clore la soirée.</p></article>
         </div>
       </div>
     </section>
 
-    <section class="section" id="faq">
+    <!-- Ticket Finder Section -->
+    <section class="section" id="find-ticket" style="background: var(--green-800); color: white;">
+      <div class="container" style="max-width: 600px; text-align: center;">
+        <div class="eyebrow" style="color: var(--gold);">Mes Billets</div>
+        <h2 style="color: white; margin-bottom: 10px;">Recherchez vos billets</h2>
+        <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">Entrez le code FESTI-XXXXXX de votre billet.</p>
+        <form id="findTicketForm" style="display: flex; gap: 10px;">
+          <input type="text" id="findTicketInput" placeholder="FESTI-A1B2C3" style="flex: 1; padding: 12px; border-radius: 4px; border: none; font-family: monospace; font-size: 1rem; text-transform: uppercase;">
+          <button type="submit" class="btn btn-primary">Rechercher</button>
+        </form>
+        <div id="findResult" style="margin-top: 20px; font-weight: 600;"></div>
+      </div>
+    </section>
+
+    <!-- Momo Payment Info -->
+    <section class="payment-section">
       <div class="container">
-        <div class="section-head">
-          <div class="eyebrow">Questions fréquentes</div>
-          <h2>Tout ce qu’il faut savoir</h2>
-        </div>
-        <div class="faq-list">
-          <details><summary>Les enfants doivent-ils payer ?</summary><p>L’entrée est gratuite pour les moins de 3 ans. Le billet Enfant s’applique de 3 à 12 ans.</p></details>
-          <details><summary>Puis-je acheter des billets sur place ?</summary><p>Oui, dans la limite des places disponibles. Nous recommandons fortement la réservation en ligne.</p></details>
-          <details><summary>Le site est-il accessible aux personnes à mobilité réduite ?</summary><p>Oui, l’ensemble du parcours est accessible. Des espaces réservés sont prévus près de la scène.</p></details>
-          <details><summary>Puis-je obtenir un remboursement ?</summary><p>Les billets sont remboursables jusqu’à 7 jours avant l’événement. Contactez l’organisation pour toute demande.</p></details>
+        <div class="payment-box">
+          <h3>Paiement Mobile Money</h3>
+          <p>Pour valider votre commande, envoyez le montant exact au numéro correspondant :</p>
+          <div style="display: flex; justify-content: center; gap: 40px; margin: 20px 0;">
+            <div>
+              <strong style="color: var(--green-800);">MTN MoMo</strong><br>
+              <span class="payment-number">691 29 85 81</span>
+            </div>
+            <div>
+              <strong style="color: var(--green-800);">Orange Money</strong><br>
+              <span class="payment-number">657 87 98 14</span>
+            </div>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--muted);">Envoyez ensuite votre code <strong>FESTI-XXXXXX</strong> par WhatsApp pour confirmer.</p>
+          <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+            <a href="https://wa.me/237691298581" target="_blank" class="btn btn-dark" style="font-size: 0.85rem;">WhatsApp 691</a>
+            <a href="https://wa.me/237657879814" target="_blank" class="btn btn-dark" style="font-size: 0.85rem;">WhatsApp 657</a>
+          </div>
         </div>
       </div>
     </section>
@@ -250,55 +260,48 @@
 
   <footer>
     <div class="container footer-inner">
-      <div><strong>Festi Noël</strong> · 19 décembre 2026 · Place du Village</div>
-      <div>Une question ? <a href="mailto:contact@festinoel.example">contact@festinoel.example</a></div>
+      <div><strong>CEMREC x AEMAS</strong> · Lycée Technique · 12 Déc 2026</div>
+      <div>Contact : 691 29 85 81 / 6 57 87 98 14</div>
     </div>
   </footer>
 
   <div class="overlay" id="overlay" hidden></div>
 
-  <aside class="cart-drawer" id="cartDrawer" aria-hidden="true" aria-label="Panier">
+  <aside class="cart-drawer" id="cartDrawer" aria-hidden="true">
     <div class="drawer-head">
       <h2>Votre panier</h2>
-      <button class="icon-btn" id="closeCartBtn" type="button" aria-label="Fermer le panier">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M6 6l12 12M18 6L6 18"/></svg>
-      </button>
+      <button class="icon-btn" id="closeCartBtn" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <div class="cart-items" id="cartItems"></div>
     <div class="drawer-footer">
-      <div class="total-row"><span>Total</span><strong id="cartTotal">0 €</strong></div>
+      <div class="total-row"><span>Total</span><strong id="cartTotal">0 FRS</strong></div>
       <button class="btn btn-primary" id="checkoutBtn" type="button">Passer commande</button>
-      <p class="demo-note">Démo — aucun paiement réel ne sera effectué.</p>
+      <p class="demo-note">Le paiement se fera par Mobile Money.</p>
     </div>
   </aside>
 
-  <div class="modal" id="checkoutModal" hidden role="dialog" aria-modal="true" aria-labelledby="checkoutTitle">
+  <div class="modal" id="checkoutModal" hidden role="dialog" aria-modal="true">
     <div class="modal-card">
       <div id="checkoutFormView">
         <div class="modal-head">
           <div><h2 id="checkoutTitle">Finaliser la commande</h2><p>Renseignez vos informations pour réserver.</p></div>
-          <button class="icon-btn" id="closeCheckoutBtn" type="button" aria-label="Fermer">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M6 6l12 12M18 6L6 18"/></svg>
-          </button>
+          <button class="icon-btn" id="closeCheckoutBtn" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
         </div>
         <div class="summary-box" id="checkoutSummary"></div>
         <form id="checkoutForm" novalidate>
           <div class="form-grid">
-            <div class="field"><label for="name">Nom complet</label><input id="name" name="name" type="text" autocomplete="name" required placeholder="Marie Dupont" /></div>
-            <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" required placeholder="marie@exemple.fr" /></div>
-            <div class="field full"><label for="phone">Téléphone (optionnel)</label><input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="06 12 34 56 78" /></div>
+            <div class="field full"><label for="name">Nom complet</label><input id="name" name="name" type="text" required placeholder="Marie Dupont" /></div>
+            <div class="field full"><label for="phone">Numéro de téléphone (MoMo/OM)</label><input id="phone" name="phone" type="tel" required placeholder="6 XX XX XX XX" /></div>
           </div>
           <button class="btn btn-primary checkout-submit" type="submit">Confirmer la réservation</button>
-          <p class="demo-note">En confirmant, vous acceptez les conditions de la démo.</p>
         </form>
       </div>
       <div class="success-view" id="successView" hidden>
-        <div class="success-icon" aria-hidden="true">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"><path d="M4 12l5 5L20 6"/></svg>
-        </div>
-        <h3>Réservation confirmée</h3>
-        <p>Merci pour votre commande. Un email de confirmation vous sera envoyé.</p>
+        <div class="success-icon" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M4 12l5 5L20 6"/></svg></div>
+        <h3>Réservation enregistrée</h3>
+        <p>Votre code de réservation est :</p>
         <div class="order-code" id="orderCode">FESTI-000000</div>
+        <p style="font-size: 0.85rem; margin-bottom: 20px;">Veuillez payer par MoMo/OM et envoyer ce code par WhatsApp pour valider vos billets.</p>
         <button class="btn btn-dark" id="successCloseBtn" type="button">Fermer</button>
       </div>
     </div>
@@ -325,12 +328,16 @@
     let tickets = [];
     let cart = loadCart();
     let toastTimer;
-    const money = (v) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: v % 1 === 0 ? 0 : 2 }).format(v);
+    
+    // Format to FRS
+    const money = (v) => new Intl.NumberFormat('fr-FR').format(v) + ' FRS';
+    
     function loadCart() { try { return JSON.parse(localStorage.getItem('festi-noel-cart')) || {}; } catch { return {}; } }
     function saveCart() { localStorage.setItem('festi-noel-cart', JSON.stringify(cart)); }
     function getTicket(id) { return tickets.find((t) => t._id === id); }
     function cartCountValue() { return Object.values(cart).reduce((s, q) => s + q, 0); }
     function cartTotalValue() { return Object.entries(cart).reduce((sum, [id, qty]) => { const t = getTicket(id); return sum + (t ? t.price * qty : 0); }, 0); }
+    
     async function fetchTickets() {
       try {
         const res = await fetch(`${API}/tickets`);
@@ -341,6 +348,7 @@
         ticketGrid.innerHTML = '<p style="color:var(--red);grid-column:1/-1;font-size:.9rem">Impossible de charger les billets.</p>';
       }
     }
+    
     function renderTickets() {
       ticketGrid.innerHTML = tickets.map((t) => {
         const icon = t.iconBase64 ? `<img src="${t.iconBase64}" alt="" />` : t.name.charAt(0).toUpperCase();
@@ -349,12 +357,13 @@
           <div class="ticket-icon" aria-hidden="true">${icon}</div>
           <h3>${t.name}</h3>
           <p class="ticket-desc">${t.description}<br /><small>${t.ageRange}</small></p>
-          <div class="price">${money(t.price)} <small>/ billet</small></div>
+          <div class="price">${money(t.price)}</div>
           <ul class="perks">${t.perks.map((p) => `<li>${p}</li>`).join('')}</ul>
-          <button class="btn btn-dark" type="button" data-add="${t._id}">Ajouter au panier</button>
+          <button class="btn btn-dark" type="button" data-add="${t._id}">Choisir ${t.name}</button>
         </article>`;
       }).join('');
     }
+    
     function renderCart() {
       const count = cartCountValue();
       const total = cartTotalValue();
@@ -369,24 +378,29 @@
       }
       cartItems.innerHTML = entries.map(([id, qty]) => {
         const t = getTicket(id);
-        return `<div class="cart-item"><div><h3>${t.name}</h3><p>${t.ageRange} · ${money(t.price)} / billet</p><div class="qty-controls"><button type="button" data-id="${id}" data-delta="-1">−</button><span>${qty}</span><button type="button" data-id="${id}" data-delta="1">+</button></div></div><div class="line-total">${money(t.price * qty)}</div></div>`;
+        return `<div class="cart-item"><div><h3>${t.name}</h3><p>${t.ageRange} · ${money(t.price)}</p><div class="qty-controls"><button type="button" data-id="${id}" data-delta="-1">−</button><span>${qty}</span><button type="button" data-id="${id}" data-delta="1">+</button></div></div><div class="line-total">${money(t.price * qty)}</div></div>`;
       }).join('');
     }
-    function addToCart(id) { if (!getTicket(id)) return; cart[id] = (cart[id] || 0) + 1; saveCart(); renderCart(); showToast('Billet ajouté au panier'); openCart(); }
+    
+    function addToCart(id) { if (!getTicket(id)) return; cart[id] = (cart[id] || 0) + 1; saveCart(); renderCart(); showToast('Billet ajouté'); openCart(); }
     function changeQuantity(id, delta) { if (!getTicket(id)) return; cart[id] = (cart[id] || 0) + delta; if (cart[id] <= 0) delete cart[id]; saveCart(); renderCart(); if (!cartCountValue()) closeCart(); }
     function setOverlay(show) { overlay.hidden = !show; document.body.classList.toggle('locked', show); }
     function openCart() { setOverlay(true); cartDrawer.classList.add('open'); cartDrawer.setAttribute('aria-hidden', 'false'); }
     function closeCart() { cartDrawer.classList.remove('open'); cartDrawer.setAttribute('aria-hidden', 'true'); if (checkoutModal.hidden) setOverlay(false); }
+    
     function renderCheckoutSummary() {
       const entries = Object.entries(cart).filter(([id, qty]) => qty > 0 && getTicket(id));
       checkoutSummary.innerHTML = entries.map(([id, qty]) => { const t = getTicket(id); return `<div class="summary-line"><span>${qty} × ${t.name}</span><strong>${money(t.price * qty)}</strong></div>`; }).join('') + `<div class="summary-total"><span>Total</span><span>${money(cartTotalValue())}</span></div>`;
     }
+    
     function openCheckout() { if (!cartCountValue()) return; closeCart(); renderCheckoutSummary(); checkoutFormView.hidden = false; successView.hidden = true; checkoutModal.hidden = false; setOverlay(true); }
     function closeCheckout() { checkoutModal.hidden = true; checkoutFormView.hidden = false; successView.hidden = true; setOverlay(false); }
     function showToast(msg) { clearTimeout(toastTimer); toast.textContent = msg; toast.classList.add('show'); toastTimer = setTimeout(() => toast.classList.remove('show'), 2400); }
-    const EVENT_DATE = new Date('2026-12-19T14:00:00+01:00');
-    function updateCountdown() { const el = document.getElementById('countdown'); const diff = EVENT_DATE - new Date(); if (diff <= 0) { el.textContent = "C'est aujourd'hui"; return; } const days = Math.floor(diff / 86400000); const hours = Math.floor((diff / 3600000) % 24); el.textContent = days > 0 ? `J-${days}` : `H-${hours}`; }
+    
+    const EVENT_DATE = new Date('2026-12-12T18:00:00');
+    function updateCountdown() { const el = document.getElementById('countdown'); const diff = EVENT_DATE - new Date(); if (diff <= 0) { el.textContent = "C'est aujourd'hui"; return; } const days = Math.floor(diff / 86400000); const hours = Math.floor((diff / 3600000) % 24); const mins = Math.floor((diff / 60000) % 60); el.textContent = `J-${days} : ${hours}h`; }
     function makeSnow() { const snow = document.getElementById('snow'); for (let i = 0; i < 30; i++) { const s = document.createElement('span'); const size = 2 + Math.random() * 3; s.style.left = Math.random() * 100 + 'vw'; s.style.width = size + 'px'; s.style.height = size + 'px'; s.style.opacity = 0.25 + Math.random() * 0.4; s.style.animationDuration = 10 + Math.random() * 14 + 's'; s.style.animationDelay = -Math.random() * 20 + 's'; snow.appendChild(s); } }
+    
     ticketGrid.addEventListener('click', (e) => { const btn = e.target.closest('[data-add]'); if (btn) addToCart(btn.dataset.add); });
     cartItems.addEventListener('click', (e) => { const btn = e.target.closest('[data-id][data-delta]'); if (btn) changeQuantity(btn.dataset.id, Number(btn.dataset.delta)); });
     document.getElementById('openCartBtn').addEventListener('click', openCart);
@@ -395,11 +409,36 @@
     document.getElementById('closeCheckoutBtn').addEventListener('click', closeCheckout);
     document.getElementById('successCloseBtn').addEventListener('click', closeCheckout);
     overlay.addEventListener('click', () => { if (!checkoutModal.hidden) closeCheckout(); else closeCart(); });
-    document.addEventListener('keydown', (e) => { if (e.key !== 'Escape') return; if (!checkoutModal.hidden) closeCheckout(); else if (cartDrawer.classList.contains('open')) closeCart(); });
+    
+    // Find Ticket Logic
+    document.getElementById('findTicketForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const code = document.getElementById('findTicketInput').value.trim().toUpperCase();
+      const resDiv = document.getElementById('findResult');
+      if (!code) return;
+      resDiv.textContent = 'Recherche...';
+      resDiv.style.color = 'white';
+      try {
+        const res = await fetch(`${API}/orders/${code}`);
+        if (!res.ok) throw new Error('Introuvable');
+        const data = await res.json();
+        resDiv.innerHTML = `<span style="color:var(--gold);">✅ Réservation trouvée pour ${data.customer.name}.</span><br>
+        <span style="font-size:0.9rem; color:rgba(255,255,255,0.8);">Statut : ${data.status === 'confirmed' ? 'Payé et Confirmé' : 'En attente de paiement MoMo/OM'}</span>`;
+      } catch (err) {
+        resDiv.innerHTML = `<span style="color:#ff6b6b;">Code introuvable. Vérifiez et réessayez.</span>`;
+      }
+    });
+
     checkoutForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!checkoutForm.checkValidity()) { checkoutForm.reportValidity(); return; }
-      const payload = { customer: { name: document.getElementById('name').value.trim(), email: document.getElementById('email').value.trim(), phone: document.getElementById('phone').value.trim() }, items: Object.entries(cart).filter(([, qty]) => qty > 0).map(([ticketId, quantity]) => ({ ticketId, quantity })) };
+      const payload = { 
+        customer: { 
+          name: document.getElementById('name').value.trim(), 
+          phone: document.getElementById('phone').value.trim() 
+        }, 
+        items: Object.entries(cart).filter(([, qty]) => qty > 0).map(([ticketId, quantity]) => ({ ticketId, quantity })) 
+      };
       try {
         const res = await fetch(`${API}/orders`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         if (!res.ok) { const errData = await res.json(); throw new Error(errData.message || 'Order failed'); }
@@ -407,9 +446,10 @@
         orderCode.textContent = data.order.orderCode;
         cart = {}; saveCart(); renderCart();
         checkoutFormView.hidden = true; successView.hidden = false;
-        showToast('Réservation confirmée');
+        showToast('Commande enregistrée');
       } catch (err) { showToast(err.message || 'Une erreur est survenue'); }
     });
+    
     makeSnow(); updateCountdown(); setInterval(updateCountdown, 60000); fetchTickets();
   </script>
 </body>
