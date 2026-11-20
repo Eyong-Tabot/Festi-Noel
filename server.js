@@ -44,8 +44,8 @@ const orderSchema = new mongoose.Schema(
   {
     customer: {
       name: { type: String, required: true, trim: true },
-      email: { type: String, required: true, trim: true, lowercase: true },
-      phone: { type: String, default: '' }
+      email: { type: String, default: '' },
+      phone: { type: String, required: true, trim: true }
     },
     items: [orderItemSchema],
     total: { type: Number, required: true, min: 0 },
@@ -87,38 +87,30 @@ function monogram(letter, fg = '#0b3d2e', bg = '#efe9df') {
 function buildDemoTickets() {
   return [
     {
-      name: 'Enfant',
-      description: 'Accès à toutes les animations et au spectacle des lutins.',
-      price: 8,
-      ageRange: '3–12 ans',
-      perks: ['Spectacle des lutins', 'Parade illuminée', 'Accès marché'],
-      iconBase64: monogram('E')
-    },
-    {
-      name: 'Adulte',
-      description: "L'expérience complète pour profiter de la journée.",
-      price: 15,
-      ageRange: '13 ans et +',
-      perks: ['Toutes les animations', 'Concert de Noël', "Feu d'artifice"],
-      iconBase64: monogram('A')
-    },
-    {
-      name: 'Pass Famille',
-      description: 'Le meilleur tarif pour toute la famille.',
-      price: 42,
-      ageRange: '2 adultes + 2 enfants',
-      perks: ['4 entrées incluses', 'Places prioritaires', 'Économie de 10 €'],
-      featured: true,
-      badge: 'Meilleure offre',
-      iconBase64: monogram('F', '#8e2c20', '#f5e6dc')
-    },
-    {
-      name: 'Pass Soirée',
-      description: "Concert, feu d'artifice et soirée dansante.",
-      price: 22,
-      ageRange: 'Dès 18h',
-      perks: ['Concert de Noël', "Feu d'artifice", 'DJ set'],
+      name: 'Single',
+      description: 'Parfait pour venir profiter de toute la soirée.',
+      price: 2000,
+      ageRange: '1 Personne',
+      perks: ['Accès à toutes les activités', 'Musique & Jeux', 'Soirée Cinéma'],
       iconBase64: monogram('S')
+    },
+    {
+      name: 'Pack 5 Personnes',
+      description: 'Venez en famille ou entre amis et économisez 1000 F.',
+      price: 9000,
+      ageRange: '5 Personnes',
+      perks: ['5 entrées incluses', 'Barbecue & Feu de camp', 'Économisez 1000 F'],
+      featured: true,
+      badge: 'Le plus populaire',
+      iconBase64: monogram('P', '#8e2c20', '#f5e6dc')
+    },
+    {
+      name: 'Couple (2 Personnes)',
+      description: 'Une soirée romantique sous les étoiles.',
+      price: 3500,
+      ageRange: '2 Personnes',
+      perks: ['2 entrées incluses', 'Accès prioritaire', 'Économisez 500 F'],
+      iconBase64: monogram('C')
     }
   ];
 }
@@ -136,21 +128,11 @@ app.get('/api/tickets', async (req, res) => {
   }
 });
 
-app.post('/api/tickets/seed', requireAdmin, async (req, res) => {
-  try {
-    await Ticket.deleteMany({});
-    const inserted = await Ticket.insertMany(buildDemoTickets());
-    res.json({ message: 'Seeded', count: inserted.length, tickets: inserted });
-  } catch (err) {
-    res.status(500).json({ message: 'Seed failed', error: err.message });
-  }
-});
-
 app.post('/api/orders', async (req, res) => {
   try {
     const { customer, items } = req.body;
-    if (!customer?.name || !customer?.email) {
-      return res.status(400).json({ message: 'Name and email are required' });
+    if (!customer?.name || !customer?.phone) {
+      return res.status(400).json({ message: 'Nom et numéro de téléphone requis' });
     }
     if (!items || !items.length) {
       return res.status(400).json({ message: 'Cart is empty' });
@@ -173,7 +155,7 @@ app.post('/api/orders', async (req, res) => {
       });
     }
     const orderCode = 'FESTI-' + Math.random().toString(36).slice(2, 8).toUpperCase();
-    const order = new Order({ customer, items: validatedItems, total, orderCode });
+    const order = new Order({ customer, items: validatedItems, total, orderCode, status: 'pending' }); // Pending until Momo is added
     await order.save();
     res.status(201).json({ message: 'Order confirmed', order });
   } catch (err) {
@@ -183,11 +165,8 @@ app.post('/api/orders', async (req, res) => {
 
 app.get('/api/orders/:code', async (req, res) => {
   try {
-    const order = await Order.findOne({ orderCode: req.params.code }).populate(
-      'items.ticketId',
-      'name price'
-    );
-    if (!order) return res.status(404).json({ message: 'Order not found' });
+    const order = await Order.findOne({ orderCode: req.params.code }).populate('items.ticketId', 'name price');
+    if (!order) return res.status(404).json({ message: 'Billet introuvable' });
     res.json(order);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
@@ -199,13 +178,9 @@ app.get('/api/orders/:code', async (req, res) => {
    ============================================================ */
 
 app.post('/api/admin/login', (req, res) => {
-  if (!ADMIN_TOKEN) {
-    return res.status(503).json({ message: 'Admin not configured. Set ADMIN_TOKEN.' });
-  }
+  if (!ADMIN_TOKEN) return res.status(503).json({ message: 'Admin not configured.' });
   const { token } = req.body || {};
-  if (!token || token !== ADMIN_TOKEN) {
-    return res.status(401).json({ message: 'Jeton incorrect' });
-  }
+  if (!token || token !== ADMIN_TOKEN) return res.status(401).json({ message: 'Jeton incorrect' });
   res.json({ ok: true });
 });
 
@@ -216,10 +191,7 @@ app.get('/api/admin/stats', requireAdmin, async (req, res) => {
       Ticket.countDocuments()
     ]);
     const revenue = orders.reduce((s, o) => s + o.total, 0);
-    const ticketsSold = orders.reduce(
-      (s, o) => s + o.items.reduce((a, i) => a + i.quantity, 0),
-      0
-    );
+    const ticketsSold = orders.reduce((s, o) => s + o.items.reduce((a, i) => a + i.quantity, 0), 0);
     res.json({ revenue, orderCount: orders.length, ticketsSold, ticketTypes: tickets });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
@@ -233,11 +205,7 @@ app.get('/api/admin/orders', requireAdmin, async (req, res) => {
     const filter = {};
     if (req.query.status) filter.status = req.query.status;
     const [orders, total] = await Promise.all([
-      Order.find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .populate('items.ticketId', 'name price'),
+      Order.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).populate('items.ticketId', 'name price'),
       Order.countDocuments(filter)
     ]);
     res.json({ orders, total, skip, limit });
@@ -296,10 +264,7 @@ app.post('/api/admin/tickets', requireAdmin, async (req, res) => {
 
 app.patch('/api/admin/tickets/:id', requireAdmin, async (req, res) => {
   try {
-    const ticket = await Ticket.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true
-    });
+    const ticket = await Ticket.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!ticket) return res.status(404).json({ message: 'Not found' });
     res.json(ticket);
   } catch (err) {
@@ -318,46 +283,32 @@ app.delete('/api/admin/tickets/:id', requireAdmin, async (req, res) => {
 });
 
 /* ============================================================
-   STATIC PAGES
+   STATIC PAGES & START
    ============================================================ */
 
 app.get('/health', (req, res) => res.status(200).send('OK'));
-
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
-
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 app.get('*', (req, res) => {
-  if (req.path.startsWith('/api/')) {
-    return res.status(404).json({ message: 'Not found' });
-  }
+  if (req.path.startsWith('/api/')) return res.status(404).json({ message: 'Not found' });
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-/* ============================================================
-   START
-   ============================================================ */
-
 async function seedIfEmpty() {
   try {
-    const count = await Ticket.countDocuments();
-    if (count === 0) {
-      await Ticket.insertMany(buildDemoTickets());
-      console.log('Seeded demo tickets on first run');
-    }
+    // Drop existing tickets to force the new real tickets to load
+    await Ticket.deleteMany({}); 
+    await Ticket.insertMany(buildDemoTickets());
+    console.log('Seeded real event tickets');
   } catch (err) {
     console.error('Seed check failed:', err.message);
   }
 }
 
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(async () => {
+mongoose.connect(process.env.MONGODB_URI).then(async () => {
     console.log('Connected to MongoDB');
     await seedIfEmpty();
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  })
-  .catch((err) => {
+  }).catch((err) => {
     console.error('MongoDB connection error:', err);
     process.exit(1);
   });
