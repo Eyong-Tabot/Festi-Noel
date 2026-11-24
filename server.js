@@ -168,7 +168,6 @@ app.get('/api/orders/:code', async (req, res) => {
   }
 });
 
-// NEW ROUTE: Find all orders by phone number
 app.get('/api/orders/phone/:phone', async (req, res) => {
   try {
     const orders = await Order.find({ 'customer.phone': req.params.phone })
@@ -190,11 +189,37 @@ app.post('/api/payments/initialize', async (req, res) => {
     const order = await Order.findOne({ orderCode });
     if (!order) return res.status(404).json({ message: 'Order not found' });
 
-    // REAL SasaPay Link
     const saspayUrl = `https://link.saspay.me/o9gdrykuu6u?ref=${orderCode}`; 
     res.json({ paymentUrl: saspayUrl });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// NEW WEBHOOK: SasaPay calls this automatically when payment is successful
+app.post('/api/payments/webhook', async (req, res) => {
+  try {
+    console.log("Webhook received from SasaPay:", req.body);
+    
+    // SasaPay might use different field names. We check a few common ones.
+    const orderCode = req.body.reference || req.body.orderCode || req.body.transactionRef; 
+    
+    if (!orderCode) {
+      return res.status(400).send('No reference provided');
+    }
+
+    const order = await Order.findOne({ orderCode });
+
+    if (order) {
+      order.status = 'confirmed';
+      await order.save();
+      console.log(`Order ${orderCode} successfully confirmed via webhook.`);
+    }
+
+    res.status(200).send('Webhook received');
+  } catch (err) {
+    console.error('Webhook error:', err.message);
+    res.status(500).send('Webhook Error');
   }
 });
 
