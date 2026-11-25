@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
-  <!-- Library to generate QR codes directly in the browser -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <style>
     :root {
       --green-900: #06281f; --green-800: #0b3d2e; --green-700: #14513e;
@@ -211,7 +211,6 @@
       </div>
     </section>
 
-    <!-- My Tickets Section -->
     <section class="section" id="find-ticket" style="background: var(--green-800); color: white;">
       <div class="container" style="max-width: 600px; text-align: center;">
         <div class="eyebrow" style="color: var(--gold);">Mes Billets</div>
@@ -235,7 +234,6 @@
 
   <div class="overlay" id="overlay" hidden></div>
 
-  <!-- Cart Drawer -->
   <aside class="cart-drawer" id="cartDrawer" aria-hidden="true">
     <div class="drawer-head">
       <h2>Votre panier</h2>
@@ -249,7 +247,6 @@
     </div>
   </aside>
 
-  <!-- Checkout Modal -->
   <div class="modal" id="checkoutModal" hidden>
     <div class="modal-card">
       <div class="modal-head">
@@ -267,13 +264,31 @@
     </div>
   </div>
 
-  <!-- QR Code Display Modal -->
+  <!-- UPDATED QR Code Modal with Download Button and Details -->
   <div class="modal" id="qrModal" hidden>
-    <div class="modal-card" style="text-align: center;">
-      <h2 style="margin-top:0; color:var(--green-800); font-family:var(--serif);">Votre Billet</h2>
-      <p style="font-family:monospace; font-weight:700; font-size:1.1rem; color:var(--red); margin-bottom:20px;" id="qrOrderCode"></p>
-      <div id="qrcode-container" style="display: flex; justify-content: center; margin-bottom: 20px; background: white; padding: 15px; border-radius: 8px;"></div>
-      <button class="btn btn-dark" style="width: 100%;" onclick="document.getElementById('qrModal').hidden = true; document.getElementById('overlay').hidden = true; document.body.classList.remove('locked');">Fermer</button>
+    <div class="modal-card" style="text-align: center; padding: 0; overflow: hidden; border-radius: 8px;">
+      
+      <!-- This div is what gets downloaded as an image -->
+      <div id="ticket-receipt" style="padding: 30px; background: white;">
+        <h2 style="margin-top:0; color:var(--green-800); font-family:var(--serif);">Festi Noël</h2>
+        <p style="color:var(--muted); font-size:0.9rem; margin-bottom: 20px;">Billet d'entrée officiel</p>
+        
+        <div style="text-align: left; margin-bottom: 20px; background: var(--cream); padding: 15px; border-radius: 4px;">
+          <p style="margin: 0 0 5px 0; font-size: 0.9rem;"><strong>Nom:</strong> <span id="qrName"></span></p>
+          <p style="margin: 0 0 5px 0; font-size: 0.9rem;"><strong>Téléphone:</strong> <span id="qrPhone"></span></p>
+          <p style="margin: 0 0 5px 0; font-size: 0.9rem;"><strong>Billets:</strong> <span id="qrItems"></span></p>
+          <p style="margin: 0; font-size: 0.9rem;"><strong>Code:</strong> <span id="qrOrderCode" style="color:var(--red); font-weight:bold;"></span></p>
+        </div>
+
+        <div id="qrcode-container" style="display: flex; justify-content: center; margin-bottom: 10px; background: white; padding: 10px;"></div>
+        <p style="font-size: 0.75rem; color: var(--muted); margin: 0;">Présentez ce QR code à l'entrée.</p>
+      </div>
+      
+      <div style="padding: 15px; background: #fdfaf3; border-top: 1px solid var(--line);">
+        <button class="btn btn-primary" style="width: 100%; margin-bottom: 10px;" id="downloadBtn">Télécharger le Billet</button>
+        <button class="btn btn-dark" style="width: 100%;" onclick="document.getElementById('qrModal').hidden = true; document.getElementById('overlay').hidden = true; document.body.classList.remove('locked');">Fermer</button>
+      </div>
+
     </div>
   </div>
 
@@ -295,6 +310,7 @@
     let tickets = [];
     let cart = loadCart();
     let toastTimer;
+    let currentOrders = []; // Store orders to display in the modal
     
     const money = (v) => new Intl.NumberFormat('fr-FR').format(v) + ' FRS';
     
@@ -389,20 +405,20 @@
       
       try {
         const res = await fetch(`${API}/orders/phone/${phone}`);
-        const orders = await res.json();
+        currentOrders = await res.json(); // Save orders globally for the modal
         
-        if (!orders.length) {
+        if (!currentOrders.length) {
           listDiv.innerHTML = '<p style="text-align:center; color:#ff6b6b;">Aucun billet trouvé pour ce numéro.</p>';
           return;
         }
         
-        listDiv.innerHTML = orders.map(o => `
+        listDiv.innerHTML = currentOrders.map((o, index) => `
           <div style="background: rgba(255,255,255,0.1); padding: 15px; margin-bottom: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid ${o.status === 'confirmed' ? 'var(--gold)' : 'orange'};">
             <div>
               <strong style="color: var(--gold); font-size: 1.1rem;">${o.orderCode}</strong><br>
               <span style="font-size: 0.85rem; color: rgba(255,255,255,0.8);">${o.items.reduce((s, i) => s + i.quantity, 0)} billet(s) - ${o.status === 'confirmed' ? 'Confirmé' : 'En attente'}</span>
             </div>
-            ${o.status === 'confirmed' ? `<button class="btn btn-primary" style="padding: 8px 12px; font-size: 0.85rem;" onclick="showQR('${o.orderCode}')">Voir QR</button>` : ''}
+            ${o.status === 'confirmed' ? `<button class="btn btn-primary" style="padding: 8px 12px; font-size: 0.85rem;" onclick="showQR(${index})">Voir QR</button>` : ''}
           </div>
         `).join('');
       } catch (err) {
@@ -411,15 +427,22 @@
     });
 
     // --- SHOW QR CODE MODAL ---
-    function showQR(code) {
-      document.getElementById('qrOrderCode').textContent = code;
+    function showQR(index) {
+      const o = currentOrders[index];
+      
+      // Populate details
+      document.getElementById('qrName').textContent = o.customer.name;
+      document.getElementById('qrPhone').textContent = o.customer.phone;
+      document.getElementById('qrItems').textContent = o.items.map(i => `${i.quantity}x ${i.ticketId?.name}`).join(', ');
+      document.getElementById('qrOrderCode').textContent = o.orderCode;
+      
       const qrDiv = document.getElementById('qrcode-container');
       qrDiv.innerHTML = ''; 
       
       new QRCode(qrDiv, {
-        text: code,
-        width: 200,
-        height: 200,
+        text: o.orderCode,
+        width: 180,
+        height: 180,
         colorDark : "#0b3d2e",
         colorLight : "#ffffff",
         correctLevel : QRCode.CorrectLevel.H
@@ -428,6 +451,19 @@
       document.getElementById('qrModal').hidden = false;
       setOverlay(true);
     }
+
+    // --- DOWNLOAD TICKET LOGIC ---
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      const receipt = document.getElementById('ticket-receipt');
+      const orderCode = document.getElementById('qrOrderCode').textContent;
+      
+      html2canvas(receipt, { scale: 2 }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `Billet_FestiNoel_${orderCode}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
+    });
 
     // --- CHECKOUT (SasaPay) ---
     checkoutForm.addEventListener('submit', async (e) => {
