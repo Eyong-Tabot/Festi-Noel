@@ -196,29 +196,19 @@ app.post('/api/payments/initialize', async (req, res) => {
   }
 });
 
-// NEW WEBHOOK: SasaPay calls this automatically when payment is successful
 app.post('/api/payments/webhook', async (req, res) => {
   try {
-    console.log("Webhook received from SasaPay:", req.body);
-    
-    // SasaPay might use different field names. We check a few common ones.
     const orderCode = req.body.reference || req.body.orderCode || req.body.transactionRef; 
-    
-    if (!orderCode) {
-      return res.status(400).send('No reference provided');
-    }
+    if (!orderCode) return res.status(400).send('No reference provided');
 
     const order = await Order.findOne({ orderCode });
-
     if (order) {
       order.status = 'confirmed';
       await order.save();
-      console.log(`Order ${orderCode} successfully confirmed via webhook.`);
+      console.log(`Order ${orderCode} confirmed via webhook.`);
     }
-
     res.status(200).send('Webhook received');
   } catch (err) {
-    console.error('Webhook error:', err.message);
     res.status(500).send('Webhook Error');
   }
 });
@@ -284,10 +274,11 @@ app.post('/api/admin/login', (req, res) => {
   res.json({ ok: true });
 });
 
+// FIXED: Only counts 'confirmed' orders for revenue
 app.get('/api/admin/stats', requireAdmin, async (req, res) => {
   try {
     const [orders, tickets] = await Promise.all([
-      Order.find({ status: { $ne: 'cancelled' } }),
+      Order.find({ status: 'confirmed' }), 
       Ticket.countDocuments()
     ]);
     const revenue = orders.reduce((s, o) => s + o.total, 0);
@@ -301,7 +292,7 @@ app.get('/api/admin/stats', requireAdmin, async (req, res) => {
 app.get('/api/admin/orders', requireAdmin, async (req, res) => {
   try {
     const [orders, total] = await Promise.all([
-      Order.find().sort({ createdAt: -1 }).limit(50).populate('items.ticketId', 'name price'),
+      Order.find().sort({ createdAt: -1 }).limit(100).populate('items.ticketId', 'name price'),
       Order.countDocuments()
     ]);
     res.json({ orders, total });
@@ -324,20 +315,25 @@ app.patch('/api/admin/orders/:id/status', requireAdmin, async (req, res) => {
   }
 });
 
+// NEW: Delete an order completely
+app.delete('/api/admin/orders/:id', requireAdmin, async (req, res) => {
+  try {
+    const order = await Order.findByIdAndDelete(req.params.id);
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+    res.json({ message: 'Transaction supprimée avec succès' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
 app.post('/api/admin/scan', requireAdmin, async (req, res) => {
   try {
     const { orderCode } = req.body;
     const order = await Order.findOne({ orderCode });
 
-    if (!order) {
-      return res.status(404).json({ message: "Fake ticket. Introuvable." });
-    }
-    if (order.status !== 'confirmed') {
-      return res.status(400).json({ message: "Paiement non validé (En attente)." });
-    }
-    if (order.isScanned) {
-      return res.status(400).json({ message: "DÉJÀ SCANNÉ ! Accès refusé." });
-    }
+    if (!order) return res.status(404).json({ message: "Fake ticket. Introuvable." });
+    if (order.status !== 'confirmed') return res.status(400).json({ message: "Paiement non validé (En attente)." });
+    if (order.isScanned) return res.status(400).json({ message: "DÉJÀ SCANNÉ ! Accès refusé." });
 
     order.isScanned = true;
     order.scannedAt = new Date();
