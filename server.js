@@ -376,15 +376,15 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// FIXED: Only seeds if the database is completely empty
 async function seedIfEmpty() {
   try {
+    // Make sure all tickets are marked as available
+    await Ticket.updateMany({}, { available: true });
+    
     const count = await Ticket.countDocuments();
     if (count === 0) {
       await Ticket.insertMany(buildDemoTickets());
-      console.log('Seeded 2 real event tickets (Single & Pack 5)');
-    } else {
-      console.log('Tickets already exist. Skipping seed.');
+      console.log('Seeded 2 real event tickets');
     }
   } catch (err) {
     console.error('Seed check failed:', err.message);
