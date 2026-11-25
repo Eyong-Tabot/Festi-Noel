@@ -38,6 +38,7 @@
     .btn-primary:hover { background: var(--green-700); }
     .btn-ghost { background: transparent; color: rgba(255,255,255,0.85); border: 1px solid rgba(255,255,255,0.22); }
     .icon-btn { width: 30px; height: 30px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: var(--white); color: var(--green-800); display: grid; place-items: center; padding: 0; }
+    .icon-btn:hover { background: #efe9df; }
     #loginView { min-height: calc(100vh - 60px); display: grid; place-items: center; padding: 24px; }
     .login-card { width: min(400px, 100%); background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 32px; }
     .login-card h1 { margin: 0 0 6px; color: var(--green-800); font-size: 1.5rem; }
@@ -61,8 +62,6 @@
     .data-table .muted { color: var(--muted); font-size: 0.8rem; }
     .data-table .right { text-align: right; }
     .data-table select.status-select { padding: 5px 8px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--white); font-size: 0.8rem; }
-    .order-detail-row td { background: #fbf8f1; padding: 0 !important; }
-    .order-detail-inner { padding: 14px 20px; font-size: 0.82rem; color: var(--muted); }
     .expand-toggle { background: transparent; border: 0; padding: 2px 6px; color: var(--green-800); font-size: 0.75rem; font-weight: 600; text-decoration: underline; }
     #reader { width: 100%; max-width: 500px; margin: 0 auto; border-radius: 8px; overflow: hidden; border: 2px solid var(--green-800); }
     .scan-result-box { text-align: center; margin-top: 20px; padding: 20px; border-radius: var(--radius); font-weight: bold; font-size: 1.1rem; }
@@ -157,6 +156,7 @@
     function showDashboard() { $('loginView').hidden = true; $('dashboardView').hidden = false; $('sessionArea').hidden = false; refreshAll(); }
 
     async function refreshAll() { try { await Promise.all([loadStats(), loadOrders()]); } catch (err) { showToast(err.message); } }
+    
     async function loadStats() {
       const s = await api('/api/admin/stats');
       $('statsGrid').innerHTML = `
@@ -170,7 +170,6 @@
       const data = await api('/api/admin/orders');
       allOrders = data.orders; $('ordersCount').textContent = `${data.total} commandes`;
       
-      // THIS IS THE FIXED TABLE WITH THE DROPDOWN RESTORED
       $('ordersBody').innerHTML = allOrders.map(o => `
         <tr>
           <td><span class="mono">${o.orderCode}</span></td>
@@ -185,11 +184,27 @@
               <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Annulée</option>
             </select>
           </td>
-          <td><button class="expand-toggle" onclick="alert('${o.items.map(i => `${i.quantity}x ${i.ticketId?.name}`).join('\\n')}')">Détails</button></td>
+          <td style="white-space: nowrap;">
+            <button class="expand-toggle" onclick="alert('${o.items.map(i => `${i.quantity}x ${i.ticketId?.name}`).join('\\n')}')">Détails</button>
+            <button class="icon-btn" style="color:var(--red); border-color: rgba(178,58,44,0.3); margin-left: 5px;" onclick="deleteOrder('${o._id}')" title="Supprimer">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
+            </button>
+          </td>
         </tr>`).join('');
     }
 
-    // THIS IS THE FIXED EVENT LISTENER THAT SAVES THE DROPDOWN CHANGE
+    window.deleteOrder = async function(id) {
+      if (!confirm("Voulez-vous vraiment supprimer cette transaction ? Cette action est irréversible.")) return;
+      try {
+        await api(`/api/admin/orders/${id}`, { method: 'DELETE' });
+        showToast('Transaction supprimée');
+        loadOrders();
+        loadStats();
+      } catch (err) {
+        showToast(err.message || 'Erreur lors de la suppression');
+      }
+    }
+
     $('ordersBody').addEventListener('change', async (e) => {
       const sel = e.target.closest('[data-order-status]');
       if (!sel) return;
@@ -206,7 +221,6 @@
       }
     });
 
-    // --- QR SCANNER LOGIC ---
     function startScanner() {
       if (!html5QrCode) { html5QrCode = new Html5Qrcode("reader"); }
       html5QrCode.start(
@@ -244,7 +258,6 @@
       setTimeout(() => { box.hidden = true; if (html5QrCode) html5QrCode.resume(); }, 3000);
     }
 
-    // Event Listeners
     $('loginForm').addEventListener('submit', async (e) => { 
       e.preventDefault(); $('loginError').hidden = true;
       try { await login($('token').value.trim()); } catch (err) { $('loginError').textContent = err.message; $('loginError').hidden = false; } 
