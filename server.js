@@ -218,7 +218,7 @@ app.get('/payment/success', async (req, res) => {
     const { ref } = req.query;
     if (!ref) return res.status(400).send('Missing reference code.');
 
-    const order = await Order.findOne({ orderCode: ref });
+    const order = await Order.findOne({ orderCode: ref }).populate('items.ticketId', 'name');
     if (!order) return res.status(404).send('Order not found.');
 
     if (order.status !== 'confirmed') {
@@ -227,6 +227,7 @@ app.get('/payment/success', async (req, res) => {
     }
 
     const qrCodeDataUrl = await QRCode.toDataURL(order.orderCode);
+    const itemsText = order.items.map(i => `${i.quantity}x ${i.ticketId?.name || 'Billet'}`).join(', ');
 
     res.send(`
       <!DOCTYPE html>
@@ -235,26 +236,47 @@ app.get('/payment/success', async (req, res) => {
         <title>Billet Confirmé - Festi Noël</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+        <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
         <style>
           body { font-family: 'Inter', sans-serif; text-align: center; padding: 40px 20px; background: #fbf8f1; margin: 0; }
           .card { background: white; padding: 30px; border-radius: 8px; max-width: 400px; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-top: 6px solid #0b3d2e; }
-          .qr-img { width: 100%; max-width: 250px; height: auto; margin: 20px auto; display: block; border: 1px solid #eee; border-radius: 8px; padding: 10px; }
+          .details { text-align: left; background: #fbf8f1; padding: 15px; border-radius: 4px; margin-bottom: 20px; font-size: 0.9rem; }
+          .details p { margin: 5px 0; color: #333; }
+          .qr-img { width: 100%; max-width: 200px; height: auto; margin: 10px auto; display: block; }
           h1 { color: #0b3d2e; font-family: Georgia, serif; margin-top: 0; }
-          .code { font-family: monospace; font-size: 1.2rem; font-weight: bold; color: #b23a2c; background: #fdfaf3; padding: 8px 12px; border-radius: 4px; display: inline-block; margin-top: 10px; border: 1px dashed #ccc; }
-          p { color: #626b66; line-height: 1.5; }
-          .btn { display: inline-block; margin-top: 25px; padding: 12px 24px; background: #0b3d2e; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; }
+          .code { font-family: monospace; font-size: 1.1rem; font-weight: bold; color: #b23a2c; }
+          .btn { display: block; width: 100%; margin-top: 15px; padding: 14px 24px; background: #0b3d2e; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; box-sizing: border-box; border: none; font-size: 1rem; cursor: pointer; }
+          .btn-outline { background: transparent; color: #0b3d2e; border: 1px solid #0b3d2e; }
         </style>
       </head>
       <body>
-        <div class="card">
-          <h1>Paiement Confirmé</h1>
-          <p>Merci <strong>${order.customer.name}</strong>. Voici votre QR Code d'accès.</p>
+        <div id="ticket-receipt" class="card">
+          <h1>Festi Noël</h1>
+          <p style="color:#666; font-size:0.9rem; margin-top:-10px; margin-bottom:20px;">Billet d'entrée officiel</p>
+          <div class="details">
+            <p><strong>Nom :</strong> ${order.customer.name}</p>
+            <p><strong>Téléphone :</strong> ${order.customer.phone}</p>
+            <p><strong>Billets :</strong> ${itemsText}</p>
+            <p><strong>Code :</strong> <span class="code">${order.orderCode}</span></p>
+          </div>
           <img src="${qrCodeDataUrl}" class="qr-img" alt="QR Code">
-          <p>Présentez ce code à l'entrée le 12 Décembre.</p>
-          <div class="code">${order.orderCode}</div>
-          <br>
-          <a href="/" class="btn">Retour à l'accueil</a>
+          <p style="font-size:0.8rem;color:#666;">Présentez ce code à l'entrée le 12 Décembre.</p>
         </div>
+        <div style="max-width: 400px; margin: 0 auto;">
+          <button onclick="downloadTicket()" class="btn">Télécharger le Billet</button>
+          <a href="/" class="btn btn-outline">Retour à l'accueil</a>
+        </div>
+
+        <script>
+          function downloadTicket() {
+            html2canvas(document.getElementById('ticket-receipt'), { scale: 2 }).then(canvas => {
+              const link = document.createElement('a');
+              link.download = 'Billet_FestiNoel_${order.orderCode}.png';
+              link.href = canvas.toDataURL('image/png');
+              link.click();
+            });
+          }
+        </script>
       </body>
       </html>
     `);
@@ -274,7 +296,6 @@ app.post('/api/admin/login', (req, res) => {
   res.json({ ok: true });
 });
 
-// FIXED: Only counts 'confirmed' orders for revenue
 app.get('/api/admin/stats', requireAdmin, async (req, res) => {
   try {
     const [orders, tickets] = await Promise.all([
@@ -315,7 +336,6 @@ app.patch('/api/admin/orders/:id/status', requireAdmin, async (req, res) => {
   }
 });
 
-// NEW: Delete an order completely
 app.delete('/api/admin/orders/:id', requireAdmin, async (req, res) => {
   try {
     const order = await Order.findByIdAndDelete(req.params.id);
