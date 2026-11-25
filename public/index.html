@@ -264,31 +264,24 @@
     </div>
   </div>
 
-  <!-- UPDATED QR Code Modal with Download Button and Details -->
   <div class="modal" id="qrModal" hidden>
     <div class="modal-card" style="text-align: center; padding: 0; overflow: hidden; border-radius: 8px;">
-      
-      <!-- This div is what gets downloaded as an image -->
       <div id="ticket-receipt" style="padding: 30px; background: white;">
         <h2 style="margin-top:0; color:var(--green-800); font-family:var(--serif);">Festi Noël</h2>
         <p style="color:var(--muted); font-size:0.9rem; margin-bottom: 20px;">Billet d'entrée officiel</p>
-        
         <div style="text-align: left; margin-bottom: 20px; background: var(--cream); padding: 15px; border-radius: 4px;">
           <p style="margin: 0 0 5px 0; font-size: 0.9rem;"><strong>Nom:</strong> <span id="qrName"></span></p>
           <p style="margin: 0 0 5px 0; font-size: 0.9rem;"><strong>Téléphone:</strong> <span id="qrPhone"></span></p>
           <p style="margin: 0 0 5px 0; font-size: 0.9rem;"><strong>Billets:</strong> <span id="qrItems"></span></p>
           <p style="margin: 0; font-size: 0.9rem;"><strong>Code:</strong> <span id="qrOrderCode" style="color:var(--red); font-weight:bold;"></span></p>
         </div>
-
         <div id="qrcode-container" style="display: flex; justify-content: center; margin-bottom: 10px; background: white; padding: 10px;"></div>
         <p style="font-size: 0.75rem; color: var(--muted); margin: 0;">Présentez ce QR code à l'entrée.</p>
       </div>
-      
       <div style="padding: 15px; background: #fdfaf3; border-top: 1px solid var(--line);">
         <button class="btn btn-primary" style="width: 100%; margin-bottom: 10px;" id="downloadBtn">Télécharger le Billet</button>
         <button class="btn btn-dark" style="width: 100%;" onclick="document.getElementById('qrModal').hidden = true; document.getElementById('overlay').hidden = true; document.body.classList.remove('locked');">Fermer</button>
       </div>
-
     </div>
   </div>
 
@@ -310,25 +303,49 @@
     let tickets = [];
     let cart = loadCart();
     let toastTimer;
-    let currentOrders = []; // Store orders to display in the modal
+    let currentOrders = [];
     
     const money = (v) => new Intl.NumberFormat('fr-FR').format(v) + ' FRS';
     
     function loadCart() { try { return JSON.parse(localStorage.getItem('festi-noel-cart')) || {}; } catch { return {}; } }
     function saveCart() { localStorage.setItem('festi-noel-cart', JSON.stringify(cart)); }
     function getTicket(id) { return tickets.find((t) => t._id === id); }
-    function cartCountValue() { return Object.values(cart).reduce((s, q) => s + q, 0); }
-    function cartTotalValue() { return Object.entries(cart).reduce((sum, [id, qty]) => { const t = getTicket(id); return sum + (t ? t.price * qty : 0); }, 0); }
+    
+    // FIXED: Only count items that actually exist in the database
+    function cartCountValue() { 
+      return Object.entries(cart)
+        .filter(([id, qty]) => qty > 0 && getTicket(id))
+        .reduce((s, [id, qty]) => s + qty, 0); 
+    }
+    function cartTotalValue() { 
+      return Object.entries(cart).reduce((sum, [id, qty]) => { 
+        const t = getTicket(id); 
+        return sum + (t ? t.price * qty : 0); 
+      }, 0); 
+    }
     
     async function fetchTickets() {
       try {
         const res = await fetch(`${API}/tickets`);
         tickets = await res.json();
+        cleanCart(); // Clean stale items from local storage
         renderTickets();
         renderCart();
       } catch (err) {
         ticketGrid.innerHTML = '<p style="color:var(--red);grid-column:1/-1;font-size:.9rem">Impossible de charger les billets.</p>';
       }
+    }
+
+    // FIXED: Removes old tickets that no longer exist in the database
+    function cleanCart() {
+      let changed = false;
+      Object.keys(cart).forEach(id => {
+        if (!getTicket(id)) { 
+          delete cart[id]; 
+          changed = true; 
+        }
+      });
+      if (changed) saveCart();
     }
     
     function renderTickets() {
@@ -391,7 +408,6 @@
     document.getElementById('closeCheckoutBtn').addEventListener('click', closeCheckout);
     overlay.addEventListener('click', () => { if (!checkoutModal.hidden) closeCheckout(); else if (!document.getElementById('qrModal').hidden) document.getElementById('qrModal').hidden = true, setOverlay(false); else closeCart(); });
     
-    // --- TICKET FINDER LOGIC ---
     const savedPhone = localStorage.getItem('festi-user-phone');
     if (savedPhone) document.getElementById('findTicketInput').value = savedPhone;
 
@@ -405,7 +421,7 @@
       
       try {
         const res = await fetch(`${API}/orders/phone/${phone}`);
-        currentOrders = await res.json(); // Save orders globally for the modal
+        currentOrders = await res.json();
         
         if (!currentOrders.length) {
           listDiv.innerHTML = '<p style="text-align:center; color:#ff6b6b;">Aucun billet trouvé pour ce numéro.</p>';
@@ -426,11 +442,8 @@
       }
     });
 
-    // --- SHOW QR CODE MODAL ---
     function showQR(index) {
       const o = currentOrders[index];
-      
-      // Populate details
       document.getElementById('qrName').textContent = o.customer.name;
       document.getElementById('qrPhone').textContent = o.customer.phone;
       document.getElementById('qrItems').textContent = o.items.map(i => `${i.quantity}x ${i.ticketId?.name}`).join(', ');
@@ -452,7 +465,6 @@
       setOverlay(true);
     }
 
-    // --- DOWNLOAD TICKET LOGIC ---
     document.getElementById('downloadBtn').addEventListener('click', () => {
       const receipt = document.getElementById('ticket-receipt');
       const orderCode = document.getElementById('qrOrderCode').textContent;
@@ -465,7 +477,6 @@
       });
     });
 
-    // --- CHECKOUT (SasaPay) ---
     checkoutForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!checkoutForm.checkValidity()) { checkoutForm.reportValidity(); return; }
@@ -478,7 +489,9 @@
           name: document.getElementById('name').value.trim(), 
           phone: phoneVal
         }, 
-        items: Object.entries(cart).filter(([, qty]) => qty > 0).map(([ticketId, quantity]) => ({ ticketId, quantity })) 
+        items: Object.entries(cart)
+          .filter(([id, qty]) => qty > 0 && getTicket(id)) 
+          .map(([ticketId, quantity]) => ({ ticketId, quantity })) 
       };
       
       try {
