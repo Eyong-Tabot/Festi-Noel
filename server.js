@@ -56,8 +56,7 @@ const orderSchema = new mongoose.Schema(
       default: 'pending'
     },
     orderCode: { type: String, unique: true, required: true },
-    isScanned: { type: Boolean, default: false },
-    scannedAt: { type: Date, default: null }
+    scannedTickets: { type: [String], default: [] } // Stores individual ticket scans
   },
   { timestamps: true }
 );
@@ -226,8 +225,25 @@ app.get('/payment/success', async (req, res) => {
       await order.save();
     }
 
-    const qrCodeDataUrl = await QRCode.toDataURL(order.orderCode);
-    const itemsText = order.items.map(i => `${i.quantity}x ${i.ticketId?.name || 'Billet'}`).join(', ');
+    // GENERATE MULTIPLE QR CODES
+    let qrCodesHtml = '';
+    let ticketCounter = 1;
+
+    for (const item of order.items) {
+      for (let i = 0; i < item.quantity; i++) {
+        const ticketCode = `${order.orderCode}-${ticketCounter}`;
+        const qrCodeDataUrl = await QRCode.toDataURL(ticketCode);
+        
+        qrCodesHtml += `
+          <div style="margin-bottom: 20px; padding: 15px; border: 1px dashed #ccc; border-radius: 8px; background: #fbf8f1;">
+            <h3 style="font-size: 1rem; color: #0b3d2e; margin-top: 0; margin-bottom: 10px;">Billet ${ticketCounter} - ${item.ticketId?.name || 'Billet'}</h3>
+            <img src="${qrCodeDataUrl}" style="width: 150px; height: 150px; display: block; margin: 0 auto;" alt="QR Code">
+            <p style="font-size: 0.8rem; color: #666; margin-top: 10px;">Code: <strong>${ticketCode}</strong></p>
+          </div>
+        `;
+        ticketCounter++;
+      }
+    }
 
     res.send(`
       <!DOCTYPE html>
@@ -242,9 +258,7 @@ app.get('/payment/success', async (req, res) => {
           .card { background: white; padding: 30px; border-radius: 8px; max-width: 400px; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-top: 6px solid #0b3d2e; }
           .details { text-align: left; background: #fbf8f1; padding: 15px; border-radius: 4px; margin-bottom: 20px; font-size: 0.9rem; }
           .details p { margin: 5px 0; color: #333; }
-          .qr-img { width: 100%; max-width: 200px; height: auto; margin: 10px auto; display: block; }
           h1 { color: #0b3d2e; font-family: Georgia, serif; margin-top: 0; }
-          .code { font-family: monospace; font-size: 1.1rem; font-weight: bold; color: #b23a2c; }
           .btn { display: block; width: 100%; margin-top: 15px; padding: 14px 24px; background: #0b3d2e; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; box-sizing: border-box; border: none; font-size: 1rem; cursor: pointer; }
           .btn-outline { background: transparent; color: #0b3d2e; border: 1px solid #0b3d2e; }
         </style>
@@ -252,18 +266,20 @@ app.get('/payment/success', async (req, res) => {
       <body>
         <div id="ticket-receipt" class="card">
           <h1>Festi Noël</h1>
-          <p style="color:#666; font-size:0.9rem; margin-top:-10px; margin-bottom:20px;">Billet d'entrée officiel</p>
+          <p style="color:#666; font-size:0.9rem; margin-top:-10px; margin-bottom:20px;">Billet(s) d'entrée officiel(s)</p>
+          
           <div class="details">
             <p><strong>Nom :</strong> ${order.customer.name}</p>
             <p><strong>Téléphone :</strong> ${order.customer.phone}</p>
-            <p><strong>Billets :</strong> ${itemsText}</p>
-            <p><strong>Code :</strong> <span class="code">${order.orderCode}</span></p>
+            <p><strong>Commande :</strong> ${order.orderCode}</p>
           </div>
-          <img src="${qrCodeDataUrl}" class="qr-img" alt="QR Code">
-          <p style="font-size:0.8rem;color:#666;">Présentez ce code à l'entrée le 12 Décembre.</p>
+
+          ${qrCodesHtml}
+
+          <p style="font-size:0.8rem;color:#666;">Présentez chaque QR code à l'entrée le 12 Décembre.</p>
         </div>
         <div style="max-width: 400px; margin: 0 auto;">
-          <button onclick="downloadTicket()" class="btn">Télécharger le Billet</button>
+          <button onclick="downloadTicket()" class="btn">Télécharger les Billets</button>
           <a href="/" class="btn btn-outline">Retour à l'accueil</a>
         </div>
 
@@ -271,7 +287,7 @@ app.get('/payment/success', async (req, res) => {
           function downloadTicket() {
             html2canvas(document.getElementById('ticket-receipt'), { scale: 2 }).then(canvas => {
               const link = document.createElement('a');
-              link.download = 'Billet_FestiNoel_${order.orderCode}.png';
+              link.download = 'Billets_FestiNoel_${order.orderCode}.png';
               link.href = canvas.toDataURL('image/png');
               link.click();
             });
@@ -346,20 +362,39 @@ app.delete('/api/admin/orders/:id', requireAdmin, async (req, res) => {
   }
 });
 
+// UPDATED SCANNER API to handle individual ticket suffixes
 app.post('/api/admin/scan', requireAdmin, async (req, res) => {
   try {
-    const { orderCode } = req.body;
-    const order = await Order.findOne({ orderCode });
+    let { orderCode } = req.body;
+    let baseCode = orderCode;
+    let ticketNum = '1'; // Default for old single tickets without a suffix
 
-    if (!order) return res.status(404).json({ message: "Fake ticket. Introuvable." });
-    if (order.status !== 'confirmed') return res.status(400).json({ message: "Paiement non validé (En attente)." });
-    if (order.isScanned) return res.status(400).json({ message: "DÉJÀ SCANNÉ ! Accès refusé." });
+    // Check if the code has a suffix (e.g., FESTI-A1B2C3-2)
+    const parts = orderCode.split('-');
+    if (parts.length === 3) {
+      baseCode = `${parts[0]}-${parts[1]}`;
+      ticketNum = parts[2];
+    }
 
-    order.isScanned = true;
-    order.scannedAt = new Date();
+    const order = await Order.findOne({ orderCode: baseCode });
+
+    if (!order) {
+      return res.status(404).json({ message: "Fake ticket. Introuvable." });
+    }
+    if (order.status !== 'confirmed') {
+      return res.status(400).json({ message: "Paiement non validé (En attente)." });
+    }
+    
+    // Check if this specific ticket number was already scanned
+    if (order.scannedTickets.includes(ticketNum)) {
+      return res.status(400).json({ message: `Billet N°${ticketNum} DÉJÀ SCANNÉ ! Accès refusé.` });
+    }
+
+    // Add to scanned list
+    order.scannedTickets.push(ticketNum);
     await order.save();
 
-    res.json({ message: "Accès Autorisé", customer: order.customer.name });
+    res.json({ message: `Accès Autorisé (Billet N°${ticketNum})`, customer: order.customer.name });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
@@ -378,13 +413,12 @@ app.get('*', (req, res) => {
 
 async function seedIfEmpty() {
   try {
-    // Make sure all tickets are marked as available
-    await Ticket.updateMany({}, { available: true });
-    
     const count = await Ticket.countDocuments();
     if (count === 0) {
       await Ticket.insertMany(buildDemoTickets());
       console.log('Seeded 2 real event tickets');
+    } else {
+      console.log('Tickets already exist. Skipping seed.');
     }
   } catch (err) {
     console.error('Seed check failed:', err.message);
