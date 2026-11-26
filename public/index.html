@@ -264,24 +264,31 @@
     </div>
   </div>
 
+  <!-- UPDATED: QR Code Modal will dynamically generate multiple QRs -->
   <div class="modal" id="qrModal" hidden>
     <div class="modal-card" style="text-align: center; padding: 0; overflow: hidden; border-radius: 8px;">
+      
       <div id="ticket-receipt" style="padding: 30px; background: white;">
         <h2 style="margin-top:0; color:var(--green-800); font-family:var(--serif);">Festi Noël</h2>
-        <p style="color:var(--muted); font-size:0.9rem; margin-bottom: 20px;">Billet d'entrée officiel</p>
+        <p style="color:var(--muted); font-size:0.9rem; margin-bottom: 20px;">Billet(s) d'entrée officiel(s)</p>
+        
         <div style="text-align: left; margin-bottom: 20px; background: var(--cream); padding: 15px; border-radius: 4px;">
           <p style="margin: 0 0 5px 0; font-size: 0.9rem;"><strong>Nom:</strong> <span id="qrName"></span></p>
           <p style="margin: 0 0 5px 0; font-size: 0.9rem;"><strong>Téléphone:</strong> <span id="qrPhone"></span></p>
-          <p style="margin: 0 0 5px 0; font-size: 0.9rem;"><strong>Billets:</strong> <span id="qrItems"></span></p>
-          <p style="margin: 0; font-size: 0.9rem;"><strong>Code:</strong> <span id="qrOrderCode" style="color:var(--red); font-weight:bold;"></span></p>
+          <p style="margin: 0; font-size: 0.9rem;"><strong>Commande:</strong> <span id="qrOrderCode" style="color:var(--red); font-weight:bold;"></span></p>
         </div>
-        <div id="qrcode-container" style="display: flex; justify-content: center; margin-bottom: 10px; background: white; padding: 10px;"></div>
-        <p style="font-size: 0.75rem; color: var(--muted); margin: 0;">Présentez ce QR code à l'entrée.</p>
+
+        <!-- Container for dynamic QR codes -->
+        <div id="qrcodes-container"></div>
+
+        <p style="font-size: 0.75rem; color: var(--muted); margin: 0;">Présentez chaque QR code à l'entrée.</p>
       </div>
+      
       <div style="padding: 15px; background: #fdfaf3; border-top: 1px solid var(--line);">
-        <button class="btn btn-primary" style="width: 100%; margin-bottom: 10px;" id="downloadBtn">Télécharger le Billet</button>
+        <button class="btn btn-primary" style="width: 100%; margin-bottom: 10px;" id="downloadBtn">Télécharger les Billets</button>
         <button class="btn btn-dark" style="width: 100%;" onclick="document.getElementById('qrModal').hidden = true; document.getElementById('overlay').hidden = true; document.body.classList.remove('locked');">Fermer</button>
       </div>
+
     </div>
   </div>
 
@@ -303,49 +310,25 @@
     let tickets = [];
     let cart = loadCart();
     let toastTimer;
-    let currentOrders = [];
+    let currentOrders = []; 
     
     const money = (v) => new Intl.NumberFormat('fr-FR').format(v) + ' FRS';
     
     function loadCart() { try { return JSON.parse(localStorage.getItem('festi-noel-cart')) || {}; } catch { return {}; } }
     function saveCart() { localStorage.setItem('festi-noel-cart', JSON.stringify(cart)); }
     function getTicket(id) { return tickets.find((t) => t._id === id); }
-    
-    // FIXED: Only count items that actually exist in the database
-    function cartCountValue() { 
-      return Object.entries(cart)
-        .filter(([id, qty]) => qty > 0 && getTicket(id))
-        .reduce((s, [id, qty]) => s + qty, 0); 
-    }
-    function cartTotalValue() { 
-      return Object.entries(cart).reduce((sum, [id, qty]) => { 
-        const t = getTicket(id); 
-        return sum + (t ? t.price * qty : 0); 
-      }, 0); 
-    }
+    function cartCountValue() { return Object.values(cart).reduce((s, q) => s + q, 0); }
+    function cartTotalValue() { return Object.entries(cart).reduce((sum, [id, qty]) => { const t = getTicket(id); return sum + (t ? t.price * qty : 0); }, 0); }
     
     async function fetchTickets() {
       try {
         const res = await fetch(`${API}/tickets`);
         tickets = await res.json();
-        cleanCart(); // Clean stale items from local storage
         renderTickets();
         renderCart();
       } catch (err) {
         ticketGrid.innerHTML = '<p style="color:var(--red);grid-column:1/-1;font-size:.9rem">Impossible de charger les billets.</p>';
       }
-    }
-
-    // FIXED: Removes old tickets that no longer exist in the database
-    function cleanCart() {
-      let changed = false;
-      Object.keys(cart).forEach(id => {
-        if (!getTicket(id)) { 
-          delete cart[id]; 
-          changed = true; 
-        }
-      });
-      if (changed) saveCart();
     }
     
     function renderTickets() {
@@ -421,7 +404,7 @@
       
       try {
         const res = await fetch(`${API}/orders/phone/${phone}`);
-        currentOrders = await res.json();
+        currentOrders = await res.json(); 
         
         if (!currentOrders.length) {
           listDiv.innerHTML = '<p style="text-align:center; color:#ff6b6b;">Aucun billet trouvé pour ce numéro.</p>';
@@ -442,36 +425,72 @@
       }
     });
 
+    // --- UPDATED: DYNAMIC QR CODE GENERATION FOR MULTIPLE TICKETS ---
     function showQR(index) {
       const o = currentOrders[index];
+      
       document.getElementById('qrName').textContent = o.customer.name;
       document.getElementById('qrPhone').textContent = o.customer.phone;
-      document.getElementById('qrItems').textContent = o.items.map(i => `${i.quantity}x ${i.ticketId?.name}`).join(', ');
       document.getElementById('qrOrderCode').textContent = o.orderCode;
       
-      const qrDiv = document.getElementById('qrcode-container');
-      qrDiv.innerHTML = ''; 
+      const container = document.getElementById('qrcodes-container');
+      container.innerHTML = ''; 
       
-      new QRCode(qrDiv, {
-        text: o.orderCode,
-        width: 180,
-        height: 180,
-        colorDark : "#0b3d2e",
-        colorLight : "#ffffff",
-        correctLevel : QRCode.CorrectLevel.H
+      let ticketCounter = 1;
+      
+      o.items.forEach(item => {
+        for (let i = 0; i < item.quantity; i++) {
+          const ticketCode = `${o.orderCode}-${ticketCounter}`;
+          
+          const div = document.createElement('div');
+          div.style.cssText = "margin-bottom: 20px; padding: 15px; border: 1px dashed #ccc; border-radius: 8px; background: #fbf8f1;";
+          
+          const title = document.createElement('h3');
+          title.style.cssText = "font-size: 1rem; color: #0b3d2e; margin-top: 0; margin-bottom: 10px;";
+          title.textContent = `Billet ${ticketCounter} - ${item.ticketId?.name || 'Billet'}`;
+          
+          const qrWrapper = document.createElement('div');
+          qrWrapper.style.cssText = "display: flex; justify-content: center; margin-bottom: 10px;";
+          
+          const qrDiv = document.createElement('div');
+          qrDiv.id = `qr-${ticketCounter}`;
+          
+          const codeText = document.createElement('p');
+          codeText.style.cssText = "font-size: 0.8rem; color: #666; margin: 0;";
+          codeText.innerHTML = `Code: <strong>${ticketCode}</strong>`;
+          
+          qrWrapper.appendChild(qrDiv);
+          div.appendChild(title);
+          div.appendChild(qrWrapper);
+          div.appendChild(codeText);
+          container.appendChild(div);
+
+          // Generate QR code
+          new QRCode(qrDiv, {
+            text: ticketCode,
+            width: 150,
+            height: 150,
+            colorDark : "#0b3d2e",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+          });
+          
+          ticketCounter++;
+        }
       });
       
       document.getElementById('qrModal').hidden = false;
       setOverlay(true);
     }
 
+    // --- DOWNLOAD TICKET LOGIC ---
     document.getElementById('downloadBtn').addEventListener('click', () => {
       const receipt = document.getElementById('ticket-receipt');
       const orderCode = document.getElementById('qrOrderCode').textContent;
       
       html2canvas(receipt, { scale: 2 }).then(canvas => {
         const link = document.createElement('a');
-        link.download = `Billet_FestiNoel_${orderCode}.png`;
+        link.download = `Billets_FestiNoel_${orderCode}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
       });
@@ -489,9 +508,7 @@
           name: document.getElementById('name').value.trim(), 
           phone: phoneVal
         }, 
-        items: Object.entries(cart)
-          .filter(([id, qty]) => qty > 0 && getTicket(id)) 
-          .map(([ticketId, quantity]) => ({ ticketId, quantity })) 
+        items: Object.entries(cart).filter(([, qty]) => qty > 0).map(([ticketId, quantity]) => ({ ticketId, quantity })) 
       };
       
       try {
